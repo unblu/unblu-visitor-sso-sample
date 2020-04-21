@@ -1,0 +1,51 @@
+= Unblu Visitor authentication using JWT
+
+A sample application with Json Web Token (JWT) authentication propagating the identity of the user as signed and encrypted JWT into a cross origin Unblu backend.
+
+1. After the login this app calls `POST https://unblu.example.com/rest/v3/authenticator/activateSecureToken`
+with the signed JWT in the request body.
+2. Unblu will then download the Json Web Key (JWK) used to sign the JWT from this sample app (i.e. https://onlinebanking.example.com/api/jwk).
+3. Assuming the JWT is valid, Unblu sets the JWT as a cookie on `unblu.example.com`.
+
+Unblu now uses the JWT in the cookie as the authentication.
+
+== Configuration
+
+.Change `application.properties` to reconfigure this Sample App
+[source,yaml]
+----
+include::src/main/resources/application.properties[]
+----
+
+== Unblu Backend
+
+The configuration `unblu.baseUrl` needs to point to a running Unblu installation with enabled ID propagation based on JWT.
+
+.JWT Configuration in Unblu
+[source]
+----
+com.unblu.authentication.untrusted.sources=PROPAGATED,NONE
+com.unblu.authentication.propagated.untrusted.userId=jwt:email
+com.unblu.authentication.propagated.untrusted.firstName=jwt:firstName
+com.unblu.authentication.propagated.untrusted.lastName=jwt:lastName
+
+com.unblu.authentication.jwt.cookieName=x-unblu-jwt
+com.unblu.authentication.jwt.jwkUrl=https://onlinebanking.example.com/api/jwk
+com.unblu.authentication.jwt.expectedIssuer=https://onlinebanking.example.com
+com.unblu.authentication.jwt.expectedAudience=https://unblu.example.com
+
+com.unblu.identifier.restrictedPathPrefix=co-${systemIdentifier}
+----
+
+== Run Sample App
+
+[source,bash]
+----
+./gradlew bootRun
+----
+
+Then open http://localhost:8080.
+
+== Known Issues
+
+None

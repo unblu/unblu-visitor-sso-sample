@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping
 
 @Controller
 class MainController(@Value("\${unblu.baseUrl}")
-                     private val unbluBaseUrl: String) {
+                     private val unbluBaseUrl: String,
+                     @Value("\${unblu.apiKey}")
+                     private val apiKey: String) {
 
     @GetMapping
     fun index(model: Model): String {
@@ -18,7 +20,7 @@ class MainController(@Value("\${unblu.baseUrl}")
 
     @GetMapping("secure")
     fun secure(model: Model): String {
-        model["unbluSnippet"] = "$unbluBaseUrl/visitor.js?x-unblu-apikey=MZsy5sFESYqU7MawXZgR_w"
+        model["unbluSnippet"] = "$unbluBaseUrl/visitor.js?x-unblu-apikey=$apiKey"
         return "secure"
     }
 

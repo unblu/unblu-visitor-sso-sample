@@ -18,10 +18,9 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.*
 import java.util.UUID
 
-
 @RestController
 @RequestMapping("api")
-class ApiController {
+class ApiController(private val jwtConfig: JwtConfiguration) {
 
     private val key: RSAKey = RSAKeyGenerator(2048)
             .keyUse(KeyUse.SIGNATURE)
@@ -36,10 +35,12 @@ class ApiController {
                 .keyID(key.keyID)
                 .build()
 
+        val expiration = Date(System.currentTimeMillis() + jwtConfig.validFor.toMillis())
         val payload = JWTClaimsSet.Builder()
-                .issuer("https://unblu.example.com")
+                .issuer(jwtConfig.issuer)
+                .audience(jwtConfig.audience)
                 .issueTime(Date())
-                .expirationTime(Date(System.currentTimeMillis() + 3600 * 1000))
+                .expirationTime(expiration)
                 // TODO use values from request parameters
                 .claim("email", "john.doe@bar.com")
                 .claim("firstName", "John")
