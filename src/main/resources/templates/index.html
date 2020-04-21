@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample App</title>
+    <script data-th-src="@{/application.js}" defer="defer" type="text/javascript"></script>
+</head>
+<body>
+
+<h1>Sample App</h1>
+
+<button id="login">Login</button>
+
+<script data-th-inline="javascript">
+var unbluUrl = [[${unbluTokenActivation}]];
+var doLogin = function() {
+    login(unbluUrl);
+};
+document.getElementById('login').addEventListener("click", doLogin);
+
+</script>
+
+</body>
+</html>
