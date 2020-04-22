@@ -26,4 +26,3 @@ class MainController(@Value("\${unblu.baseUrl}")
 
 }
 
-data class TokenResponse(val token: String)
