@@ -1,8 +1,7 @@
 package com.unblu.demo.sample.jwt
 
-import com.nimbusds.jose.JOSEObjectType
-import com.nimbusds.jose.JWSAlgorithm
-import com.nimbusds.jose.JWSHeader
+import com.nimbusds.jose.*
+import com.nimbusds.jose.crypto.RSAEncrypter
 import com.nimbusds.jose.crypto.RSASSASigner
 import com.nimbusds.jose.jwk.JWKSet
 import com.nimbusds.jose.jwk.KeyUse
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.*
 import java.util.UUID
 
+
 @RestController
 @RequestMapping("api")
 class ApiController(private val jwtConfig: JwtConfiguration) {
@@ -28,15 +28,44 @@ class ApiController(private val jwtConfig: JwtConfiguration) {
             .generate()
     private val signer = RSASSASigner(key.toRSAPrivateKey())
 
+    // TODO load key from config
+    // https://connect2id.com/products/nimbus-jose-jwt/examples/pem-encoded-objects
+    private val recipentJWK: RSAKey = RSAKeyGenerator(2048)
+            .keyUse(KeyUse.SIGNATURE)
+            .keyID(UUID.randomUUID().toString())
+            .generate()
+    private val encrypter: JWEEncrypter = RSAEncrypter(recipentJWK.toRSAPublicKey())
+
     @PostMapping("token")
     fun createJwt(): TokenResponse {
         val header = JWSHeader.Builder(JWSAlgorithm.RS256)
                 .type(JOSEObjectType.JWT)
                 .keyID(key.keyID)
                 .build()
+        val signedJWT = SignedJWT(header, createJwtPayload())
 
+        signedJWT.sign(signer)
+
+        val token = if (jwtConfig.encryption) {
+            // Create JWE object with signed JWT as payload
+            val jweObject = JWEObject(
+                    JWEHeader.Builder(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A256GCM)
+                            .contentType("JWT")
+                            .build(),
+                    Payload(signedJWT))
+
+            // Encrypt with the recipient's public key
+            jweObject.encrypt(encrypter)
+            jweObject.serialize()
+        } else {
+            signedJWT.serialize()
+        }
+        return TokenResponse(token)
+    }
+
+    private fun createJwtPayload(): JWTClaimsSet {
         val expiration = Date(System.currentTimeMillis() + jwtConfig.validFor.toMillis())
-        val payload = JWTClaimsSet.Builder()
+        return JWTClaimsSet.Builder()
                 .issuer(jwtConfig.issuer)
                 .audience(jwtConfig.audience)
                 .issueTime(Date())
@@ -46,9 +75,6 @@ class ApiController(private val jwtConfig: JwtConfiguration) {
                 .claim("firstName", "John")
                 .claim("lastName", "Doe")
                 .build()
-        val signedJWT = SignedJWT(header, payload)
-        signedJWT.sign(signer)
-        return TokenResponse(signedJWT.serialize())
     }
 
     @GetMapping("jwk")

@@ -46,6 +46,15 @@ com.unblu.identifier.restrictedPathPrefix=co-${systemIdentifier}
 
 Then open http://localhost:8080.
 
+.cURL samples
+[source,bash]
+----
+# List generated JWKs
+curl localhost:8080/api/jwk
+# Issue a new JWT
+curl -X POST localhost:8080/api/token
+----
+
 == Known Issues
 
 None

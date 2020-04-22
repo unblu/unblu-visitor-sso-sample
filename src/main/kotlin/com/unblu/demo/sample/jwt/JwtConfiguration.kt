@@ -9,5 +9,6 @@ import java.time.Duration
 data class JwtConfiguration(
         val issuer: String,
         val audience: String,
-        val validFor: Duration
+        val validFor: Duration,
+        val encryption: Boolean
 )
