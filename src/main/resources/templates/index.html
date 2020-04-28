@@ -11,12 +11,15 @@
 
 <button id="login">Login</button>
 
+<span id="login-result"></span>
+
 <script data-th-inline="javascript">
 var unbluUrl = [[${unbluTokenActivation}]];
 var doLogin = function() {
     login(unbluUrl);
 };
 document.getElementById('login').addEventListener("click", doLogin);
+
 
 </script>
 

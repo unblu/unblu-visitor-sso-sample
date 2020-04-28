@@ -33,7 +33,9 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 
-	implementation("com.nimbusds:nimbus-jose-jwt:8.3")
+	implementation("com.nimbusds:nimbus-jose-jwt:8.15")
+	implementation("org.bouncycastle:bcprov-jdk15on:[1.52,)")
+	implementation("org.bouncycastle:bcpkix-jdk15on:[1.52,)")
 
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-test") {

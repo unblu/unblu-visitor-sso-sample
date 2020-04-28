@@ -7,9 +7,13 @@ function login(unbluUrl) {
 		})
 		.then((data) => {
 			console.log('jwt: ', data);
-			activateUnbluJwt(data.token, unbluUrl).then((response) => {
-				window.location.href = '/secure';
-			});
+			activateUnbluJwt(data.token, unbluUrl)
+				.then((response) => {
+					window.location.href = '/secure';
+				})
+				.catch((error) => {
+					document.getElementById('login-result').textContent = 'Login failed! ' + error;
+				});
 		});
 }
 
@@ -24,8 +28,8 @@ function activateUnbluJwt(jwt, unbluUrl) {
 					console.log('token activated', xhttp);
 					resolve('done');
 				} else {
-					console.error('unblu response: ', xhttp);
-					reject('failed to activate!')
+					// console.error('unblu response: ', xhttp);
+					reject('Failed to activate token!')
 				}
 			}
 		};
