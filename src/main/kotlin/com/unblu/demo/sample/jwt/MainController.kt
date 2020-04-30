@@ -14,7 +14,7 @@ class MainController(@Value("\${unblu.baseUrl}")
 
     @GetMapping
     fun index(model: Model): String {
-        model["unbluTokenActivation"] = "$unbluBaseUrl/rest/v3/authenticator/loginWithJwt"
+        model["unbluTokenActivation"] = "$unbluBaseUrl/rest/v3/authenticator/loginWithJwt?x-unblu-apikey=$apiKey"
         return "index"
     }
 

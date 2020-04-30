@@ -69,9 +69,9 @@ class ApiController(private val jwtConfig: JwtConfiguration,
                 .issueTime(Date())
                 .expirationTime(expiration)
                 // TODO use values from request parameters
-                .claim("email", "john.doe@bar.com")
-                .claim("firstName", "John")
-                .claim("lastName", "Doe")
+                .claim("email", "peter.muster@bar.com")
+                .claim("firstName", "Peter")
+                .claim("lastName", "Muster")
                 .build()
     }
 
