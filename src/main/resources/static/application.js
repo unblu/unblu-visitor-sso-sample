@@ -1,6 +1,5 @@
 
 function login(unbluUrl) {
-	console.log('Hello Login!');
 	fetch('/api/token', {method: 'POST'})
 		.then((response) => {
 			return response.json();
@@ -37,4 +36,24 @@ function activateUnbluJwt(jwt, unbluUrl) {
 		xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		xhttp.send(JSON.stringify({token: jwt, type: 'JWT'}));
 	});
+}
+
+function logout(unbluLogoutUrl) {
+	var xhttp = new XMLHttpRequest();
+	xhttp.withCredentials = true;
+	return new Promise(function (resolve, reject) {
+		xhttp.onreadystatechange = function() {
+			if (this.readyState == 4) {
+				if (this.status == 204) {
+					console.log('logout successful', xhttp);
+					resolve('done');
+				} else {
+					reject('Failed to stop session!')
+				}
+			}
+		};
+		xhttp.open("GET", unbluLogoutUrl, true);
+		xhttp.send();
+	});
+
 }

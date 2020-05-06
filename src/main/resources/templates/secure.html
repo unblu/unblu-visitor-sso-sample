@@ -4,10 +4,31 @@
     <meta charset="UTF-8">
     <title>Sample App - Secured Area</title>
     <script data-th-src="${unbluSnippet}" defer="defer" type="text/javascript"></script>
+    <script data-th-src="@{/application.js}" defer="defer" type="text/javascript"></script>
 </head>
 <body>
 
 <h1>Secured Area</h1>
+
+<button id="logout">Logout</button>
+
+
+<script data-th-inline="javascript">
+var unbluLogoutUrl = [[${unbluLogout}]];
+var doLogout = function() {
+    logout(unbluLogoutUrl)
+        .then((response) => {
+            window.location.href = '/';
+        })
+        .catch((error) => {
+            console.log('Logout failed', error);
+        });
+};
+document.getElementById('logout').addEventListener("click", doLogout);
+
+
+
+</script>
 
 </body>
 </html>

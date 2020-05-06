@@ -21,6 +21,7 @@ class MainController(@Value("\${unblu.baseUrl}")
     @GetMapping("secure")
     fun secure(model: Model): String {
         model["unbluSnippet"] = "$unbluBaseUrl/visitor.js?x-unblu-apikey=$apiKey"
+        model["unbluLogout"] = "$unbluBaseUrl/rest/v3/authenticator/logout"
         return "secure"
     }
 
