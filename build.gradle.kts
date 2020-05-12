@@ -11,13 +11,6 @@ group = "com.unblu.demo"
 version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
-val developmentOnly by configurations.creating
-configurations {
-	runtimeClasspath {
-		extendsFrom(developmentOnly)
-	}
-}
-
 repositories {
 	mavenCentral()
 }
@@ -37,7 +30,6 @@ dependencies {
 	implementation("org.bouncycastle:bcprov-jdk15on:[1.52,)")
 	implementation("org.bouncycastle:bcpkix-jdk15on:[1.52,)")
 
-	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-test") {
 		exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
 	}
