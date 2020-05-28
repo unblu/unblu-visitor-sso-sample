@@ -9,6 +9,8 @@ with the signed JWT in the request body.
 
 Unblu now uses the JWT in the cookie as the authentication.
 
+NOTE: Login using a JWT is only possible since Unblu 6.13.0!
+
 == Configuration
 
 .Change `application.properties` to reconfigure this Sample App
