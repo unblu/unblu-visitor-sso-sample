@@ -1,6 +1,6 @@
 = Unblu Visitor authentication using JWT
 
-A sample application with Json Web Token (JWT) authentication propagating the identity of the user as signed and encrypted JWT into a cross origin Unblu backend.
+A sample application to pass the identity properties of the user into a cross origin Unblu backend using a signed and encrypted Json Web Token (JWT).
 
 1. After the login this app calls `POST https://unblu.example.com/rest/v3/authenticator/loginWithSecureToken`
 with the signed JWT in the request body.
