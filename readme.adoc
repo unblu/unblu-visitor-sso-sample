@@ -11,6 +11,9 @@ Unblu now uses the JWT in the cookie as the authentication.
 
 NOTE: Login using a JWT is only possible since Unblu 6.13.0!
 
+CAUTION: The Unblu backend and the host application must run on the same second-level domain (e.g. `example.com`).
+Otherwise, some browsers (i.e. Safari) will treat the Unblu authentication cookie as a third-party cookie and therefore block it.
+
 == Configuration
 
 .Change `application.properties` to reconfigure this Sample App
