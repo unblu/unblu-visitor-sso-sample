@@ -1,10 +1,10 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-	id("org.springframework.boot") version "2.2.6.RELEASE"
-	id("io.spring.dependency-management") version "1.0.9.RELEASE"
-	kotlin("jvm") version "1.3.71"
-	kotlin("plugin.spring") version "1.3.71"
+	id("org.springframework.boot") version "2.4.0"
+	id("io.spring.dependency-management") version "1.0.10.RELEASE"
+	kotlin("jvm") version "1.4.10"
+	kotlin("plugin.spring") version "1.4.10"
 }
 
 group = "com.unblu.demo"
@@ -26,13 +26,11 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 
-	implementation("com.nimbusds:nimbus-jose-jwt:8.15")
-	implementation("org.bouncycastle:bcprov-jdk15on:[1.52,)")
-	implementation("org.bouncycastle:bcpkix-jdk15on:[1.52,)")
+	implementation("com.nimbusds:nimbus-jose-jwt:9.1.3")
+	implementation("org.bouncycastle:bcprov-jdk15on:[1.61,)")
+	implementation("org.bouncycastle:bcpkix-jdk15on:[1.61,)")
 
-	testImplementation("org.springframework.boot:spring-boot-starter-test") {
-		exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
-	}
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("io.projectreactor:reactor-test")
 }
 

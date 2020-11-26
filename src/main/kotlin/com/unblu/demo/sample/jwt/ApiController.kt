@@ -10,7 +10,6 @@ import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
-import net.minidev.json.JSONObject
 import org.springframework.core.io.Resource
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -76,7 +75,7 @@ class ApiController(private val jwtConfig: JwtConfiguration,
     }
 
     @GetMapping("jwk")
-    fun keys(): JSONObject {
+    fun keys(): Map<String, Any> {
         return JWKSet(key.toPublicJWK()).toJSONObject()
     }
 
