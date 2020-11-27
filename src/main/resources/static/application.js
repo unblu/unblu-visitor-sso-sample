@@ -1,6 +1,18 @@
 
 function login(unbluUrl) {
-	fetch('/api/token', {method: 'POST'})
+	var tokenRequest = {
+		email: document.getElementById('email').value,
+		firstname: document.getElementById('firstname').value,
+		lastname: document.getElementById('lastname').value
+	};
+	var request = {
+		method: 'POST',
+		headers: {
+		  'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(tokenRequest)
+	};
+	fetch('/api/token', request)
 		.then((response) => {
 			return response.json();
 		})
@@ -52,7 +64,7 @@ function logout(unbluLogoutUrl) {
 				}
 			}
 		};
-		xhttp.open("GET", unbluLogoutUrl, true);
+		xhttp.open("POST", unbluLogoutUrl, true);
 		xhttp.send();
 	});
 

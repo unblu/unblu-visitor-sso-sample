@@ -11,10 +11,7 @@ import com.nimbusds.jose.jwk.gen.RSAKeyGenerator
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import org.springframework.core.io.Resource
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.util.*
 import java.util.UUID
 
@@ -33,13 +30,15 @@ class ApiController(private val jwtConfig: JwtConfiguration,
     private val unbluPublicKey: RSAKey = readKey(unbluConfiguration.publicKey)
     private val encrypter: JWEEncrypter = RSAEncrypter(unbluPublicKey)
 
+
     @PostMapping("token")
-    fun createJwt(): TokenResponse {
+    fun createJwt(@RequestBody request: JwtRequest): TokenResponse {
         val header = JWSHeader.Builder(JWSAlgorithm.RS256)
                 .type(JOSEObjectType.JWT)
                 .keyID(key.keyID)
                 .build()
-        val signedJWT = SignedJWT(header, createJwtPayload())
+        val payload = createJwtPayload(request.email, request.firstname, request.lastname)
+        val signedJWT = SignedJWT(header, payload)
 
         signedJWT.sign(signer)
 
@@ -60,17 +59,18 @@ class ApiController(private val jwtConfig: JwtConfiguration,
         return TokenResponse(token)
     }
 
-    private fun createJwtPayload(): JWTClaimsSet {
+    private fun createJwtPayload(email: String,
+                                 firstname: String,
+                                 lastname: String): JWTClaimsSet {
         val expiration = Date(System.currentTimeMillis() + jwtConfig.validFor.toMillis())
         return JWTClaimsSet.Builder()
                 .issuer(jwtConfig.issuer)
                 .audience(jwtConfig.audience)
                 .issueTime(Date())
                 .expirationTime(expiration)
-                // TODO use values from request parameters
-                .claim("email", "peter.muster@bar.com")
-                .claim("firstName", "Peter")
-                .claim("lastName", "Muster")
+                .claim("email", email)
+                .claim("firstName", firstname)
+                .claim("lastName", lastname)
                 .build()
     }
 

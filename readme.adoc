@@ -110,9 +110,12 @@ Then open http://localhost:8080.
 [source,bash]
 ----
 # List generated JWKs
-curl localhost:8080/api/jwk
+curl -s localhost:8080/api/jwk | jq
 # Issue a new JWT
-curl -X POST localhost:8080/api/token
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"email": "peter.muster@example.com", "firstname": "Peter", "lastname": "Muster"}' \
+  localhost:8080/api/token | jq
 ----
 
 == Known Issues

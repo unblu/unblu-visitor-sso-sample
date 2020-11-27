@@ -9,6 +9,16 @@
 
 <h1>Sample App</h1>
 
+<p>
+    Email <input id="email" name="email" type="text" value="peter.muster@example.com"/>
+</p>
+<p>
+    Firstname <input id="firstname" name="email" type="text" value="Peter"/>
+</p>
+<p>
+    Lastname <input id="lastname" name="email" type="text" value="Muster"/>
+</p>
+
 <button id="login">Login</button>
 
 <span id="login-result"></span>
@@ -19,7 +29,6 @@ var doLogin = function() {
     login(unbluUrl);
 };
 document.getElementById('login').addEventListener("click", doLogin);
-
 
 </script>
 
