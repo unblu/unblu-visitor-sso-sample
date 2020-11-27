@@ -32,3 +32,4 @@ out/
 .vscode/
 
 application-default.properties
+push.sh

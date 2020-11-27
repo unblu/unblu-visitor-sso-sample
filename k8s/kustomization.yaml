@@ -1,0 +1,8 @@
+resources:
+  - deployment.yaml
+  - service.yaml
+
+configMapGenerator:
+  - name: sample-jwt-auth-config
+    literals:
+      - UNBLU_BASEURL=https://unblu.example.com/unblu

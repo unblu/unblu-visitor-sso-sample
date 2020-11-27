@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-jwt-app
+spec:
+  selector:
+    matchLabels:
+      app: sample-jwt-app
+  template:
+    metadata:
+      labels:
+        app: sample-jwt-app
+    spec:
+      containers:
+        - name: jwt-auth
+          image: sample-jwt-app
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "1000m"
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+          envFrom:
+            - configMapRef:
+                name: sample-jwt-auth-config

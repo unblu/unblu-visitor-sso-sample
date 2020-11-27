@@ -118,6 +118,18 @@ curl -X POST \
   localhost:8080/api/token | jq
 ----
 
+== Publish OCI Image
+
+[source,bash]
+----
+REGISTRY="gcr.io/your-project"
+IMAGE="$REGISTRY/samples/jwt-auth"
+VERSION="0.0.1-SNAPSHOT"
+./gradlew bootBuildImage
+docker tag sample-jwt-auth:$VERSION $IMAGE:$VERSION
+docker push $IMAGE:$VERSION
+----
+
 == Known Issues
 
 None
