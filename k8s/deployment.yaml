@@ -14,6 +14,7 @@ spec:
       containers:
         - name: jwt-auth
           image: sample-jwt-app
+          imagePullPolicy: Always
           resources:
             requests:
               memory: "512Mi"
