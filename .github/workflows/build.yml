@@ -37,9 +37,9 @@ jobs:
       - name: Build image
         run: ./gradlew bootBuildImage --imageName=unblu-visitor-sso-sample
       - name: Tag and push image
+        if: github.ref == 'refs/heads/main'
         run: |
           docker tag unblu-visitor-sso-sample ghcr.io/unblu/unblu-visitor-sso-sample
           docker tag unblu-visitor-sso-sample ghcr.io/unblu/unblu-visitor-sso-sample:${GITHUB_SHA::8}
           docker push ghcr.io/unblu/unblu-visitor-sso-sample
           docker push ghcr.io/unblu/unblu-visitor-sso-sample:${GITHUB_SHA::8}
-
