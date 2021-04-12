@@ -1,6 +1,6 @@
-= Unblu Visitor Single-Sign On (SSO)
+= Unblu Visitor Single Sign-On (SSO)
 :source-highlighter: rouge
-:toc:
+#:toc:
 
 
 A sample application to pass the identity properties of the user into a cross origin Unblu backend using a signed and encrypted Json Web Token (JWT).

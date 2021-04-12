@@ -1,4 +1,4 @@
-= Unblu Visitor authentication using JWT
+= Unblu Visitor Single Sign-On (SSO)
 
 Documentation: https://unblu.github.io/unblu-visitor-sso-sample/[HTML]
 
