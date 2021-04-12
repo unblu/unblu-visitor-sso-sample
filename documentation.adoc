@@ -1,6 +1,6 @@
 = Unblu Visitor Single Sign-On (SSO)
 :source-highlighter: rouge
-#:toc:
+//:toc:
 
 
 A sample application to pass the identity properties of the user into a cross origin Unblu backend using a signed and encrypted Json Web Token (JWT).
@@ -20,7 +20,7 @@ Otherwise, some browsers (i.e. Safari) will treat the Unblu authentication cooki
 == Configuration
 
 .Change `application.properties` to reconfigure this Sample App
-[source,yaml]
+[source,ini]
 ----
 include::src/main/resources/application.properties[]
 ----
@@ -30,7 +30,7 @@ include::src/main/resources/application.properties[]
 The configuration `unblu.baseUrl` needs to point to a running Unblu installation with enabled ID propagation based on JWT.
 
 .JWT Configuration in Unblu
-[source]
+[source,ini]
 ----
 com.unblu.identifier.restrictedPathPrefix=co-${systemIdentifier}
 
