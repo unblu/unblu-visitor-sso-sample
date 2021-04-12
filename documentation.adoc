@@ -22,7 +22,7 @@ Otherwise, some browsers (i.e. Safari) will treat the Unblu authentication cooki
 .Change `application.properties` to reconfigure this Sample App
 [source,ini]
 ----
-include::src/main/resources/application.properties[]
+include::src/main/resources/application.properties[tag=config]
 ----
 
 == Unblu Backend
