@@ -4,9 +4,16 @@ Documentation: https://unblu.github.io/unblu-visitor-sso-sample/[HTML]
 
 == Run Sample App
 
+.Build from source
 [source,bash]
 ----
 ./gradlew bootRun
+----
+
+.Run using Docker
+[source,bash]
+----
+docker run --r -p 8080:8080 ghcr.io/unblu/unblu-visitor-sso-sample
 ----
 
 Then open http://localhost:8080.
@@ -21,18 +28,6 @@ curl -X POST \
   -H "Content-Type: application/json" \
   -d '{"email": "peter.muster@example.com", "firstname": "Peter", "lastname": "Muster"}' \
   localhost:8080/api/token | jq
-----
-
-== Publish OCI Image
-
-[source,bash]
-----
-REGISTRY="gcr.io/your-project"
-IMAGE="$REGISTRY/samples/jwt-auth"
-VERSION="0.0.1-SNAPSHOT"
-./gradlew bootBuildImage
-docker tag sample-jwt-auth:$VERSION $IMAGE:$VERSION
-docker push $IMAGE:$VERSION
 ----
 
 == Known Issues

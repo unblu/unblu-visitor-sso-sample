@@ -6,3 +6,8 @@ configMapGenerator:
   - name: sample-jwt-auth-config
     literals:
       - UNBLU_BASEURL=https://unblu.example.com/unblu
+
+images:
+  - name: unblu-visitor-sso-sample
+    newName: ghcr.io/unblu/unblu-visitor-sso-sample
+    newTag: latest

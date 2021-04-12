@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sample-jwt-app
+  name: unblu-visitor-sso-sample
 spec:
   selector:
     matchLabels:
-      app: sample-jwt-app
+      app: unblu-visitor-sso-sample
   template:
     metadata:
       labels:
-        app: sample-jwt-app
+        app: unblu-visitor-sso-sample
     spec:
       containers:
         - name: jwt-auth
-          image: sample-jwt-app
+          image: unblu-visitor-sso-sample
           imagePullPolicy: Always
           resources:
             requests:

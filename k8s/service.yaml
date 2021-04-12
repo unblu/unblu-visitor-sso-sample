@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: sample-jwt-app
+  name: unblu-visitor-sso-sample
 spec:
   type: ClusterIP
   selector:
-    app: sample-jwt-app
+    app: unblu-visitor-sso-sample
   ports:
     - port: 80
       targetPort: 8080
