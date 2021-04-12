@@ -65,7 +65,8 @@ function logout(unbluLogoutUrl) {
 			}
 		};
 		xhttp.open("POST", unbluLogoutUrl, true);
-		xhttp.send();
+		xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		xhttp.send(JSON.stringify({redirectOnSuccess: null}));
 	});
 
 }
