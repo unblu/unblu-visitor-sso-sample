@@ -9,9 +9,9 @@ jobs:
 
       - name: Install and Build 🔧
         run: |
-          apt update
-          apt install -y ruby
-          gem install asciidoctor
+          sudo apt update
+          sudo apt install -y ruby
+          gem install asciidoctor rouge
           asciidoctor -o docs/index.html documentation.adoc
 
       - name: Deploy 🚀
