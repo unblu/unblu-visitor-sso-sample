@@ -434,17 +434,383 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 #footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
+<style>
+pre.rouge table td { padding: 5px; }
+pre.rouge table pre { margin: 0; }
+pre.rouge .cm {
+  color: #999988;
+  font-style: italic;
+}
+pre.rouge .cp {
+  color: #999999;
+  font-weight: bold;
+}
+pre.rouge .c1 {
+  color: #999988;
+  font-style: italic;
+}
+pre.rouge .cs {
+  color: #999999;
+  font-weight: bold;
+  font-style: italic;
+}
+pre.rouge .c, pre.rouge .ch, pre.rouge .cd, pre.rouge .cpf {
+  color: #999988;
+  font-style: italic;
+}
+pre.rouge .err {
+  color: #a61717;
+  background-color: #e3d2d2;
+}
+pre.rouge .gd {
+  color: #000000;
+  background-color: #ffdddd;
+}
+pre.rouge .ge {
+  color: #000000;
+  font-style: italic;
+}
+pre.rouge .gr {
+  color: #aa0000;
+}
+pre.rouge .gh {
+  color: #999999;
+}
+pre.rouge .gi {
+  color: #000000;
+  background-color: #ddffdd;
+}
+pre.rouge .go {
+  color: #888888;
+}
+pre.rouge .gp {
+  color: #555555;
+}
+pre.rouge .gs {
+  font-weight: bold;
+}
+pre.rouge .gu {
+  color: #aaaaaa;
+}
+pre.rouge .gt {
+  color: #aa0000;
+}
+pre.rouge .kc {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kd {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kn {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kp {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kr {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kt {
+  color: #445588;
+  font-weight: bold;
+}
+pre.rouge .k, pre.rouge .kv {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .mf {
+  color: #009999;
+}
+pre.rouge .mh {
+  color: #009999;
+}
+pre.rouge .il {
+  color: #009999;
+}
+pre.rouge .mi {
+  color: #009999;
+}
+pre.rouge .mo {
+  color: #009999;
+}
+pre.rouge .m, pre.rouge .mb, pre.rouge .mx {
+  color: #009999;
+}
+pre.rouge .sa {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .sb {
+  color: #d14;
+}
+pre.rouge .sc {
+  color: #d14;
+}
+pre.rouge .sd {
+  color: #d14;
+}
+pre.rouge .s2 {
+  color: #d14;
+}
+pre.rouge .se {
+  color: #d14;
+}
+pre.rouge .sh {
+  color: #d14;
+}
+pre.rouge .si {
+  color: #d14;
+}
+pre.rouge .sx {
+  color: #d14;
+}
+pre.rouge .sr {
+  color: #009926;
+}
+pre.rouge .s1 {
+  color: #d14;
+}
+pre.rouge .ss {
+  color: #990073;
+}
+pre.rouge .s, pre.rouge .dl {
+  color: #d14;
+}
+pre.rouge .na {
+  color: #008080;
+}
+pre.rouge .bp {
+  color: #999999;
+}
+pre.rouge .nb {
+  color: #0086B3;
+}
+pre.rouge .nc {
+  color: #445588;
+  font-weight: bold;
+}
+pre.rouge .no {
+  color: #008080;
+}
+pre.rouge .nd {
+  color: #3c5d5d;
+  font-weight: bold;
+}
+pre.rouge .ni {
+  color: #800080;
+}
+pre.rouge .ne {
+  color: #990000;
+  font-weight: bold;
+}
+pre.rouge .nf, pre.rouge .fm {
+  color: #990000;
+  font-weight: bold;
+}
+pre.rouge .nl {
+  color: #990000;
+  font-weight: bold;
+}
+pre.rouge .nn {
+  color: #555555;
+}
+pre.rouge .nt {
+  color: #000080;
+}
+pre.rouge .vc {
+  color: #008080;
+}
+pre.rouge .vg {
+  color: #008080;
+}
+pre.rouge .vi {
+  color: #008080;
+}
+pre.rouge .nv, pre.rouge .vm {
+  color: #008080;
+}
+pre.rouge .ow {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .o {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .w {
+  color: #bbbbbb;
+}
+pre.rouge {
+  background-color: #f8f8f8;
+}
+</style>
 </head>
 <body class="article">
 <div id="header">
 <h1>Unblu Visitor Single-Sign On (SSO)</h1>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_configuration">Configuration</a></li>
+<li><a href="#_unblu_backend">Unblu Backend</a></li>
+</ul>
+</div>
 </div>
 <div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>A sample application to pass the identity properties of the user into a cross origin Unblu backend using a signed and encrypted Json Web Token (JWT).</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>After the login this app calls <code>POST <a href="https://unblu.example.com/rest/v3/authenticator/loginWithSecureToken" class="bare">https://unblu.example.com/rest/v3/authenticator/loginWithSecureToken</a></code>
+with the signed JWT in the request body.</p>
+</li>
+<li>
+<p>Unblu will then download the Json Web Key (JWK) used to sign the JWT from this sample app (i.e. <a href="https://onlinebanking.example.com/api/jwk" class="bare">https://onlinebanking.example.com/api/jwk</a>).</p>
+</li>
+<li>
+<p>Assuming the JWT is valid, Unblu sets a session id as a cookie on <code>unblu.example.com</code>.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Unblu now uses the JWT in the cookie as the authentication.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Login using a JWT is only possible since Unblu 6.13.0!
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Caution</div>
+</td>
+<td class="content">
+The Unblu backend and the host application must run on the same second-level domain (e.g. <code>example.com</code>).
+Otherwise, some browsers (i.e. Safari) will treat the Unblu authentication cookie as a third-party cookie and therefore block it.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuration">Configuration</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">Change <code>application.properties</code> to reconfigure this Sample App</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="yaml"><span class="c1"># suppress inspection "UnusedProperty" for whole file</span>
+<span class="s">unblu.baseUrl=http://sample.unblu-test.com:7777/unblu</span>
+<span class="s">unblu.apiKey=MZsy5sFESYqU7MawXZgR_w</span>
+<span class="s">unblu.publicKey=classpath:unblu.pub</span>
+<span class="s">jwt.issuer=https://onlinebanking.example.com</span>
+<span class="s">jwt.audience=https://unblu.example.com</span>
+<span class="s">jwt.validFor=1h</span>
+<span class="s">jwt.encryption=false</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_unblu_backend">Unblu Backend</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The configuration <code>unblu.baseUrl</code> needs to point to a running Unblu installation with enabled ID propagation based on JWT.</p>
+</div>
+<div class="listingblock">
+<div class="title">JWT Configuration in Unblu</div>
+<div class="content">
+<pre class="rouge highlight"><code>com.unblu.identifier.restrictedPathPrefix=co-${systemIdentifier}
 
+com.unblu.authentication.untrusted.sources=LOCAL
+
+com.unblu.authentication.jwt.jwkUrl=https://onlinebanking.example.com/api/jwk
+com.unblu.authentication.jwt.expectedIssuer=https://onlinebanking.example.com
+com.unblu.authentication.jwt.expectedAudience=https://unblu.example.com
+com.unblu.authentication.jwt.useEncryption=false
+com.unblu.authentication.jwt.encryptionKey=-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCpt4w09CoBF4UQ\n2YTr9n1LjJZjIvnjeE7UoGwJrxEFxUhTMaRY7To3iYMxH6NaUwwABSt4rbykeZFB\nvus4oRBVqcisBXzP8+USX9u1cuhteNGqvXpVsw0YeuhIYiYTTkzAcFHTi/pJDrdd\npOVMnpCKtO++oec7ILhOOSxrxoBjFg4ICdJIz+fkGB0hxez/Xp6xNp2sfEv5ULhj\nxjvXXXjg6vD0u3BCt+BxRhpRpPRwbPmwGeWY/sjPttBXhPKIBIchRqRfRHOz3MJJ\nnQonRItxkwbWgIvgZ2fCyIDiKKyYFxG0fSkSFChTuuMOD+6a3cISSTXAs/H7chy+\nL7f3EJp3AgMBAAECggEAKcaomJBRlps3ggJJGdw+003z5stBP6DppqUmcuvJAOai\n+veJQOqEHg+XX4wuJZmzpn2fScFaYhIak1hvhiz/XFbCsrVXF8ktZex6pJt4YxoO\nYjzp1BaS7qeybb7bKH1pnyUGv1ABd+JLeJ2SY93ULpCDQyWPSZqwQ3EHYjAmgj0Q\nzWnxNAwqz8hKkHvNimSZmZFPqAA6IOeoRJY/yBPjl/CTbivaIoHnPCs1bGJ6wtoX\nmQVEv8UrEUITj/W3pSWIWpYjSkxLIAH6CrstusPIdESX9a2XmpEbMblKhM4TTYgz\nUu6KH8CVWqJEqL/EkoTv2Z+ZmprgNIJ/9XS26fgSIQKBgQDblu4MVn5zaKY0JPwE\nF0sLQ02vaRirfjtBsQpiuo7czmVz02I1xwnj/j8GNOGQxRdDPXblR19c0zmSQq4X\nfX3PYq+ZZv9OTU1gaEqx2BirNk/IifI0G8R9xdy7/KvFXA4cbMdrYyPbx6jy1e6S\nb0Hlb3JQFqHUinP6cMXuvqWUVQKBgQDF26RE7lxkGypmBgTIoC/zLkKqtB/9pWTq\n2yDVRFuoxTRgRLdb5c+6Vmyty4Pc846s8MAb2eA/5SzeU6kYcNTVUpPGmVDuG6P6\nyIvpIaKGieSo93kfFMuzizoolaARQxa4Cgt7D3F0rTXwzl86fdmmcz2tc+r4EEZ9\nVAELUfOfmwKBgAkvHdOsRmujQ9hId7XgF4ZoETa16Y86n1XXBr0sWk9H3pxiief/\n5B0CBDbJPWnlpFxulKtwOb/TIcRJP6jB2eIzmW6MDT+EIilXE1Cu3hFDG0Ei69tc\nEfLEtL+0CKcfe4Oa1RhbtCM8DYfihLDhMFtdNuW8nJYcGE+wKccbeCdlAoGAaQLE\n8azMrnjYjON+4HhcWqXfzjfhjr6cjCWXDHnGaBGaVcnCw2x6TryV27vbFYbS36i7\nXUzKvz7EDI+8fHNOEpZMRiiTEnzrECwmTaqDVwKSsLb/uuZPotAvIuEe3mqMAUub\ngknU/ob7zP3K/wFSZgxd3NRcDiKdNuFB2J87PScCgYEAgwC7RkLO1IYS+FZ0aHLL\nrkbEqT5CHtnf2eLW6xLYhxHFFacpbhLVOAs6bXT5NWkm4UmgZTBEAwxtJ+EjXMOn\nLQJXTsDYrWTWzyShBCfID+6kT5/JLGK06CmAnOXadd2ESY3d+QdKE0jE1cbTp2Q8\nIIQdfNOVVaTOS+OHMuwNraA=\n-----END PRIVATE KEY-----
+
+com.unblu.authentication.tokenSignup.enabled=true
+com.unblu.authentication.tokenSignup.claimMapping.username=email
+com.unblu.authentication.tokenSignup.claimMapping.email=email
+com.unblu.authentication.tokenSignup.claimMapping.firstName=firstName
+com.unblu.authentication.tokenSignup.claimMapping.lastName=lastName</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Generate RSA key pair</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">openssl genpkey <span class="nt">-algorithm</span> RSA <span class="nt">-out</span> unblu.pem <span class="nt">-pkeyopt</span> rsa_keygen_bits:2048
+openssl rsa <span class="nt">-pubout</span> <span class="nt">-in</span> unblu.pem <span class="nt">-out</span> unblu_public.pem</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Key pair for testing</div>
+<div class="content">
+<pre class="rouge highlight"><code>-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqbeMNPQqAReFENmE6/Z9
+S4yWYyL543hO1KBsCa8RBcVIUzGkWO06N4mDMR+jWlMMAAUreK28pHmRQb7rOKEQ
+VanIrAV8z/PlEl/btXLobXjRqr16VbMNGHroSGImE05MwHBR04v6SQ63XaTlTJ6Q
+irTvvqHnOyC4Tjksa8aAYxYOCAnSSM/n5BgdIcXs/16esTadrHxL+VC4Y8Y71114
+4Orw9LtwQrfgcUYaUaT0cGz5sBnlmP7Iz7bQV4TyiASHIUakX0Rzs9zCSZ0KJ0SL
+cZMG1oCL4GdnwsiA4iismBcRtH0pEhQoU7rjDg/umt3CEkk1wLPx+3Icvi+39xCa
+dwIDAQAB
+-----END PUBLIC KEY-----
+
+-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCpt4w09CoBF4UQ
+2YTr9n1LjJZjIvnjeE7UoGwJrxEFxUhTMaRY7To3iYMxH6NaUwwABSt4rbykeZFB
+vus4oRBVqcisBXzP8+USX9u1cuhteNGqvXpVsw0YeuhIYiYTTkzAcFHTi/pJDrdd
+pOVMnpCKtO++oec7ILhOOSxrxoBjFg4ICdJIz+fkGB0hxez/Xp6xNp2sfEv5ULhj
+xjvXXXjg6vD0u3BCt+BxRhpRpPRwbPmwGeWY/sjPttBXhPKIBIchRqRfRHOz3MJJ
+nQonRItxkwbWgIvgZ2fCyIDiKKyYFxG0fSkSFChTuuMOD+6a3cISSTXAs/H7chy+
+L7f3EJp3AgMBAAECggEAKcaomJBRlps3ggJJGdw+003z5stBP6DppqUmcuvJAOai
++veJQOqEHg+XX4wuJZmzpn2fScFaYhIak1hvhiz/XFbCsrVXF8ktZex6pJt4YxoO
+Yjzp1BaS7qeybb7bKH1pnyUGv1ABd+JLeJ2SY93ULpCDQyWPSZqwQ3EHYjAmgj0Q
+zWnxNAwqz8hKkHvNimSZmZFPqAA6IOeoRJY/yBPjl/CTbivaIoHnPCs1bGJ6wtoX
+mQVEv8UrEUITj/W3pSWIWpYjSkxLIAH6CrstusPIdESX9a2XmpEbMblKhM4TTYgz
+Uu6KH8CVWqJEqL/EkoTv2Z+ZmprgNIJ/9XS26fgSIQKBgQDblu4MVn5zaKY0JPwE
+F0sLQ02vaRirfjtBsQpiuo7czmVz02I1xwnj/j8GNOGQxRdDPXblR19c0zmSQq4X
+fX3PYq+ZZv9OTU1gaEqx2BirNk/IifI0G8R9xdy7/KvFXA4cbMdrYyPbx6jy1e6S
+b0Hlb3JQFqHUinP6cMXuvqWUVQKBgQDF26RE7lxkGypmBgTIoC/zLkKqtB/9pWTq
+2yDVRFuoxTRgRLdb5c+6Vmyty4Pc846s8MAb2eA/5SzeU6kYcNTVUpPGmVDuG6P6
+yIvpIaKGieSo93kfFMuzizoolaARQxa4Cgt7D3F0rTXwzl86fdmmcz2tc+r4EEZ9
+VAELUfOfmwKBgAkvHdOsRmujQ9hId7XgF4ZoETa16Y86n1XXBr0sWk9H3pxiief/
+5B0CBDbJPWnlpFxulKtwOb/TIcRJP6jB2eIzmW6MDT+EIilXE1Cu3hFDG0Ei69tc
+EfLEtL+0CKcfe4Oa1RhbtCM8DYfihLDhMFtdNuW8nJYcGE+wKccbeCdlAoGAaQLE
+8azMrnjYjON+4HhcWqXfzjfhjr6cjCWXDHnGaBGaVcnCw2x6TryV27vbFYbS36i7
+XUzKvz7EDI+8fHNOEpZMRiiTEnzrECwmTaqDVwKSsLb/uuZPotAvIuEe3mqMAUub
+gknU/ob7zP3K/wFSZgxd3NRcDiKdNuFB2J87PScCgYEAgwC7RkLO1IYS+FZ0aHLL
+rkbEqT5CHtnf2eLW6xLYhxHFFacpbhLVOAs6bXT5NWkm4UmgZTBEAwxtJ+EjXMOn
+LQJXTsDYrWTWzyShBCfID+6kT5/JLGK06CmAnOXadd2ESY3d+QdKE0jE1cbTp2Q8
+IIQdfNOVVaTOS+OHMuwNraA=
+-----END PRIVATE KEY-----</code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-04-12 05:23:06 UTC
+Last updated 2021-04-12 05:27:11 UTC
 </div>
 </div>
 </body>
