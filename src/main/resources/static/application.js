@@ -1,6 +1,7 @@
 
 function login(unbluUrl) {
 	var tokenRequest = {
+		username: document.getElementById('username').value,
 		email: document.getElementById('email').value,
 		firstname: document.getElementById('firstname').value,
 		lastname: document.getElementById('lastname').value

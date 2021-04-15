@@ -19,15 +19,17 @@ class ApiControllerTest {
 
     @Test
     fun createJwtToken() {
+        val username = "pmuster"
         val email = "peter.muster@example.com"
         val firstname = "Peter"
         val lastname = "Muster"
-        val jwtRequest = JwtRequest(email, firstname, lastname)
+        val jwtRequest = JwtRequest(username, email, firstname, lastname)
 
         val verifyResponse = fun(tokenResponse: TokenResponse?) {
             assertThat(tokenResponse).isNotNull
             val jwt = SignedJWT.parse(tokenResponse?.token)
             val claims = jwt.jwtClaimsSet.claims
+            assertThat(claims["username"]).isEqualTo(username)
             assertThat(claims["email"]).isEqualTo(email)
             assertThat(claims["firstName"]).isEqualTo(firstname)
             assertThat(claims["lastName"]).isEqualTo(lastname)

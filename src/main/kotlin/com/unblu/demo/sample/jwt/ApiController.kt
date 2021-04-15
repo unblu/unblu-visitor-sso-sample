@@ -13,18 +13,19 @@ import com.nimbusds.jwt.SignedJWT
 import org.springframework.core.io.Resource
 import org.springframework.web.bind.annotation.*
 import java.util.*
-import java.util.UUID
 
 
 @RestController
 @RequestMapping("api")
-class ApiController(private val jwtConfig: JwtConfiguration,
-                    unbluConfiguration: UnbluConfiguration) {
+class ApiController(
+    private val jwtConfig: JwtConfiguration,
+    unbluConfiguration: UnbluConfiguration
+) {
 
     private val key: RSAKey = RSAKeyGenerator(2048)
-            .keyUse(KeyUse.SIGNATURE)
-            .keyID(UUID.randomUUID().toString())
-            .generate()
+        .keyUse(KeyUse.SIGNATURE)
+        .keyID(UUID.randomUUID().toString())
+        .generate()
     private val signer = RSASSASigner(key.toRSAPrivateKey())
 
     private val unbluPublicKey: RSAKey = readKey(unbluConfiguration.publicKey)
@@ -34,22 +35,20 @@ class ApiController(private val jwtConfig: JwtConfiguration,
     @PostMapping("token")
     fun createJwt(@RequestBody request: JwtRequest): TokenResponse {
         val header = JWSHeader.Builder(JWSAlgorithm.RS256)
-                .type(JOSEObjectType.JWT)
-                .keyID(key.keyID)
-                .build()
-        val payload = createJwtPayload(request.email, request.firstname, request.lastname)
+            .type(JOSEObjectType.JWT)
+            .keyID(key.keyID)
+            .build()
+        val payload = createJwtPayload(request)
         val signedJWT = SignedJWT(header, payload)
 
         signedJWT.sign(signer)
 
         val token = if (jwtConfig.encryption) {
             // Create JWE object with signed JWT as payload
-            val jweObject = JWEObject(
-                    JWEHeader.Builder(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A256GCM)
-                            .contentType("JWT")
-                            .build(),
-                    Payload(signedJWT))
-
+            val jweHeader = JWEHeader.Builder(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A256GCM)
+                .contentType("JWT")
+                .build()
+            val jweObject = JWEObject(jweHeader, Payload(signedJWT))
             // Encrypt with the recipient's public key
             jweObject.encrypt(encrypter)
             jweObject.serialize()
@@ -59,19 +58,18 @@ class ApiController(private val jwtConfig: JwtConfiguration,
         return TokenResponse(token)
     }
 
-    private fun createJwtPayload(email: String,
-                                 firstname: String,
-                                 lastname: String): JWTClaimsSet {
+    private fun createJwtPayload(request: JwtRequest): JWTClaimsSet {
         val expiration = Date(System.currentTimeMillis() + jwtConfig.validFor.toMillis())
         return JWTClaimsSet.Builder()
-                .issuer(jwtConfig.issuer)
-                .audience(jwtConfig.audience)
-                .issueTime(Date())
-                .expirationTime(expiration)
-                .claim("email", email)
-                .claim("firstName", firstname)
-                .claim("lastName", lastname)
-                .build()
+            .issuer(jwtConfig.issuer)
+            .audience(jwtConfig.audience)
+            .issueTime(Date())
+            .expirationTime(expiration)
+            .claim("email", request.email)
+            .claim("username", request.username)
+            .claim("firstName", request.firstname)
+            .claim("lastName", request.lastname)
+            .build()
     }
 
     @GetMapping("jwk")
