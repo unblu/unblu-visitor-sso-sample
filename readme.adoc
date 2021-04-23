@@ -13,7 +13,7 @@ Documentation: https://unblu.github.io/unblu-visitor-sso-sample/[HTML]
 .Run using Docker
 [source,bash]
 ----
-docker run --r -p 8080:8080 ghcr.io/unblu/unblu-visitor-sso-sample
+docker run --rm -p 8080:8080 ghcr.io/unblu/unblu-visitor-sso-sample
 ----
 
 Then open http://localhost:8080.
