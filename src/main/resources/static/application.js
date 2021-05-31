@@ -45,7 +45,6 @@ async function checkAuthentication(unbluBaseUrl) {
   * @see activateUnbluJwt
   */
 function login(unbluBaseUrl, unbluApiKey) {
-	var unbluUrl = `${unbluBaseUrl}/rest/v3/authenticator/loginWithSecureToken?x-unblu-apikey=${unbluApiKey}`;
 	var tokenRequest = {
 		username: document.getElementById('username').value,
 		email: document.getElementById('email').value,
@@ -65,7 +64,7 @@ function login(unbluBaseUrl, unbluApiKey) {
 		})
 		.then((data) => {
 			console.log('jwt: ', data);
-			activateUnbluJwt(data.token, unbluUrl)
+			activateUnbluJwt(data.token, unbluBaseUrl, unbluApiKey)
 				.then((response) => {
 					initPage(unbluBaseUrl, unbluApiKey);
 				})
@@ -79,46 +78,46 @@ function login(unbluBaseUrl, unbluApiKey) {
   * Starts an Unblu authentication session using a JWT.
   * @returns {Promise}, fulfilled when login succeeded, rejected when login failed.
   */
-function activateUnbluJwt(jwt, unbluUrl) {
-	// XMLHttpRequest is mandatory here, fetch ignores Set-Cookie headers
-	var xhttp = new XMLHttpRequest();
-	xhttp.withCredentials = true;
-	return new Promise(function (resolve, reject) {
-		xhttp.onreadystatechange = function() {
-			if (this.readyState == 4) {
-				if (this.status == 204) {
-					console.log('token activated', xhttp);
-					resolve('done');
-				} else {
-					// console.error('unblu response: ', xhttp);
-					reject('Failed to activate token!')
-				}
+function activateUnbluJwt(jwt, unbluBaseUrl, unbluApiKey) {
+	var request = {
+		method: 'POST',
+		headers: {
+		  'Content-Type': 'application/json;charset=UTF-8'
+		},
+		body: JSON.stringify({token: jwt, type: 'JWT'}),
+		credentials: 'include'
+	};
+	var loginUrl = `${unbluBaseUrl}/rest/v3/authenticator/loginWithSecureToken?x-unblu-apikey=${unbluApiKey}`;
+	return fetch(loginUrl, request)
+		.then((response) => {
+			if (response.ok) {
+				console.log('Unblu session activated');
+			} else {
+				throw new Error('Failed to activate token!');
 			}
-		};
-		xhttp.open("POST", unbluUrl, true);
-		xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xhttp.send(JSON.stringify({token: jwt, type: 'JWT'}));
-	});
+		});
 }
 
+/**
+  * Calls the Unblu logout endpoint.
+  * @returns {Promise}, fulfilled when logout succeeded, rejected when logout failed.
+  */
 function logout(unbluBaseUrl) {
-    var unbluLogoutUrl = unbluBaseUrl + "/rest/v3/authenticator/logout";
-	var xhttp = new XMLHttpRequest();
-	xhttp.withCredentials = true;
-	return new Promise(function (resolve, reject) {
-		xhttp.onreadystatechange = function() {
-			if (this.readyState == 4) {
-				if (this.status == 204) {
-					console.log('logout successful', xhttp);
-					resolve('done');
-				} else {
-					reject('Failed to stop session!')
-				}
+	var request = {
+		method: 'POST',
+		headers: {
+		  'Content-Type': 'application/json;charset=UTF-8'
+		},
+		body: JSON.stringify({redirectOnSuccess: null}),
+		credentials: 'include'
+	};
+	var logoutUrl = unbluBaseUrl + "/rest/v3/authenticator/logout";
+	return fetch(logoutUrl, request)
+		.then((response) => {
+			if (response.ok) {
+				console.log('Unblu logout successful');
+			} else {
+				throw new Error('Unblu logout failed!');
 			}
-		};
-		xhttp.open("POST", unbluLogoutUrl, true);
-		xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xhttp.send(JSON.stringify({redirectOnSuccess: null}));
-	});
-
+		});
 }
