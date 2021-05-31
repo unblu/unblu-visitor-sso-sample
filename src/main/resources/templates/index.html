@@ -2,36 +2,90 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>Sample App</title>
     <script data-th-src="@{/application.js}" defer="defer" type="text/javascript"></script>
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 
-<h1>Sample App</h1>
+<div class="container">
 
-<p>
-    Username <input id="username" name="username" type="text" value="pmuster"/>
-</p>
-<p>
-    Email <input id="email" name="email" type="text" value="peter.muster@example.com"/>
-</p>
-<p>
-    Firstname <input id="firstname" name="email" type="text" value="Peter"/>
-</p>
-<p>
-    Lastname <input id="lastname" name="email" type="text" value="Muster"/>
-</p>
+    <h1 class="mt-5">Sample App</h1>
 
-<button id="login">Login</button>
+    <div class="row mb-12">
+        <p id="authentication"></p>
+    </div>
+
+    <form action="" id="sign-in-form" onsubmit="return false;">
+        <fieldset>
+            <legend>Sign In</legend>
+
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label" for="username">Username</label>
+                <div class="col-sm-10">
+                    <input class="form-control" id="username" type="text" value="pmuster"/>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label" for="email">Email</label>
+                <div class="col-sm-10">
+                    <input class="form-control" id="email" type="text" value="peter.muster@example.com"/>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label" for="firstname">Firstname</label>
+                <div class="col-sm-10">
+                    <input class="form-control" id="firstname" type="text" value="Peter"/>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label" for="lastname">Lastname</label>
+                <div class="col-sm-10">
+                    <input class="form-control" id="lastname" type="text" value="Muster"/>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="login">Submit</button>
+        </fieldset>
+    </form>
+
+    <form action="" id="sign-out-form" onsubmit="return false;">
+        <button class="btn btn-primary" id="logout">Logout</button>
+    </form>
+
+</div>
+
 
 <span id="login-result"></span>
 
 <script data-th-inline="javascript">
-var unbluUrl = [[${unbluTokenActivation}]];
+var unbluBaseUrl = [[${unbluBaseUrl}]];
+var unbluApiKey = [[${unbluApiKey}]];
+
 var doLogin = function() {
-    login(unbluUrl);
+    login(unbluBaseUrl, unbluApiKey);
 };
 document.getElementById('login').addEventListener("click", doLogin);
+
+var doLogout = function() {
+    logout(unbluBaseUrl)
+        .then((response) => {
+            location.reload();
+        })
+        .catch((error) => {
+            console.log('Logout failed', error);
+        });
+};
+document.getElementById('logout').addEventListener("click", doLogout);
+
+window.onload = async function WindowLoad(event) {
+    initPage(unbluBaseUrl, unbluApiKey);
+}
+
 
 </script>
 

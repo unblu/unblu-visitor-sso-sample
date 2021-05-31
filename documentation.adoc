@@ -32,7 +32,12 @@ The configuration `unblu.baseUrl` needs to point to a running Unblu installation
 .JWT Configuration in Unblu
 [source,ini]
 ----
+# Ensure that /unblu (visitor) and /co-unblu (agent) are separated
+# and authentication cookies are set on the correct path
+com.unblu.identifier.publicPathPrefix=${systemIdentifier}
 com.unblu.identifier.restrictedPathPrefix=co-${systemIdentifier}
+# Visitor SSO is typically used in a cross site setup, we therefore disable the site-embedded mode
+com.unblu.identifier.siteEmbeddedSetup=false
 
 com.unblu.authentication.untrusted.sources=LOCAL
 
@@ -47,6 +52,12 @@ com.unblu.authentication.tokenSignup.claimMapping.username=username
 com.unblu.authentication.tokenSignup.claimMapping.email=email
 com.unblu.authentication.tokenSignup.claimMapping.firstName=firstName
 com.unblu.authentication.tokenSignup.claimMapping.lastName=lastName
+
+# in order to use cross site cookies, you need to use HTTPS
+com.unblu.identifier.cookieSecureFlag=true
+com.unblu.runtime.jetty.securehttpenabled=true
+com.unblu.runtime.jetty.keystorepath=tls.p12
+com.unblu.runtime.jetty.keystorepassword=password
 ----
 
 .Generate RSA key pair

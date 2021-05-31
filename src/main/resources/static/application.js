@@ -1,5 +1,51 @@
+/**
+  * Check Unblu authentication and update UI state accordingly.
+  */
+async function initPage(unbluBaseUrl, unbluApiKey) {
+    var authentication = document.getElementById('authentication');
+    var signInForm = document.getElementById('sign-in-form');
+    var signOutForm = document.getElementById('sign-out-form');
+    var isAuthenticated = await checkAuthentication(unbluBaseUrl);
+    if (isAuthenticated) {
+        authentication.innerHTML = "You are authenticated.";
+        signInForm.style.display = 'none';
+        signOutForm.style.display = 'block';
+        // add the Unblu script tag
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = `${unbluBaseUrl}/visitor.js?x-unblu-apikey=${unbluApiKey}`;
+        document.head.append(script);
+    } else {
+        authentication.innerHTML = "You are not authenticated.";
+        signInForm.style.display = 'block';
+        signOutForm.style.display = 'none';
+    }
+}
 
-function login(unbluUrl) {
+/**
+  * Calls the authentication verification endpoint of Unblu.
+  *
+  * @returns {Promise<boolean>} Whether the user is authenticated
+  */
+async function checkAuthentication(unbluBaseUrl) {
+	var options = { credentials: 'include' };
+	return await fetch(unbluBaseUrl + '/rest/v3/authenticator/isAuthenticated', options)
+		.then(response => {
+			  if (!response.ok) {
+                const message = `An error has occurred: ${response.status}`;
+                throw new Error(message);
+              }
+              return response;
+		})
+		.then(response => response.json());
+}
+
+/**
+  * Reads user information from the form, requests a JWT, and starts the authentication procedure of Unblu.
+  * @see activateUnbluJwt
+  */
+function login(unbluBaseUrl, unbluApiKey) {
+	var unbluUrl = `${unbluBaseUrl}/rest/v3/authenticator/loginWithSecureToken?x-unblu-apikey=${unbluApiKey}`;
 	var tokenRequest = {
 		username: document.getElementById('username').value,
 		email: document.getElementById('email').value,
@@ -21,7 +67,7 @@ function login(unbluUrl) {
 			console.log('jwt: ', data);
 			activateUnbluJwt(data.token, unbluUrl)
 				.then((response) => {
-					window.location.href = '/secure';
+					initPage(unbluBaseUrl, unbluApiKey);
 				})
 				.catch((error) => {
 					document.getElementById('login-result').textContent = 'Login failed! ' + error;
@@ -29,6 +75,10 @@ function login(unbluUrl) {
 		});
 }
 
+/**
+  * Starts an Unblu authentication session using a JWT.
+  * @returns {Promise}, fulfilled when login succeeded, rejected when login failed.
+  */
 function activateUnbluJwt(jwt, unbluUrl) {
 	// XMLHttpRequest is mandatory here, fetch ignores Set-Cookie headers
 	var xhttp = new XMLHttpRequest();
@@ -51,7 +101,8 @@ function activateUnbluJwt(jwt, unbluUrl) {
 	});
 }
 
-function logout(unbluLogoutUrl) {
+function logout(unbluBaseUrl) {
+    var unbluLogoutUrl = unbluBaseUrl + "/rest/v3/authenticator/logout";
 	var xhttp = new XMLHttpRequest();
 	xhttp.withCredentials = true;
 	return new Promise(function (resolve, reject) {
