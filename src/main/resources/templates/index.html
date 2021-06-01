@@ -5,6 +5,8 @@
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>Sample App</title>
     <script data-th-src="@{/application.js}" defer="defer" type="text/javascript"></script>
+    <script data-th-src="${unbluServerUrl} + ${unbluEntryPath} + '/js-api/v2/visitor/visitor-api.min.js'" defer="defer"
+            type="text/javascript"></script>
     <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
@@ -63,29 +65,19 @@
 <span id="login-result"></span>
 
 <script data-th-inline="javascript">
-var unbluBaseUrl = [[${unbluBaseUrl}]];
-var unbluApiKey = [[${unbluApiKey}]];
-
-var doLogin = function() {
-    login(unbluBaseUrl, unbluApiKey);
-};
-document.getElementById('login').addEventListener("click", doLogin);
-
-var doLogout = function() {
-    logout(unbluBaseUrl)
-        .then((response) => {
-            location.reload();
-        })
-        .catch((error) => {
-            console.log('Logout failed', error);
-        });
-};
-document.getElementById('logout').addEventListener("click", doLogout);
 
 window.onload = async function WindowLoad(event) {
-    initPage(unbluBaseUrl, unbluApiKey);
-}
+    var unbluServerUrl = [[${unbluServerUrl}]];
+    var unbluEntryPath = [[${unbluEntryPath}]];
+    var unbluApiKey = [[${unbluApiKey}]];
 
+    var sampleApp = new SampleApp(unbluServerUrl, unbluEntryPath, unbluApiKey);
+    sampleApp.init();
+
+    document.getElementById('login').addEventListener("click", sampleApp.login.bind(sampleApp));
+    document.getElementById('logout').addEventListener("click", sampleApp.logout.bind(sampleApp));
+
+}
 
 </script>
 

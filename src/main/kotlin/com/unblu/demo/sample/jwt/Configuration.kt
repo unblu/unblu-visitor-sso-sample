@@ -17,7 +17,8 @@ data class JwtConfiguration(
 @ConstructorBinding
 @ConfigurationProperties(prefix = "unblu")
 data class UnbluConfiguration(
-        val baseUrl: String,
+        val serverUrl: String,
+        val entryPath: String,
         val apiKey: String,
         val publicKey: Resource
 )
