@@ -33,13 +33,14 @@ class SampleApp {
         }
     }
 
+	// tag::checkAuthentication[]
     /**
       * Calls the authentication verification endpoint of Unblu.
       *
       * @returns {Promise<boolean>} Whether the user is authenticated
       */
     async checkAuthentication() {
-        var options = { credentials: 'include' };
+        var options = { credentials: 'include' }; // <1>
         return await fetch(this.unbluBaseUrl + '/rest/v3/authenticator/isAuthenticated', options)
             .then(response => {
                 if (!response.ok) {
@@ -50,6 +51,7 @@ class SampleApp {
             })
             .then(response => response.json());
     }
+    // end::checkAuthentication[]
 
     /**
       * Reads user information from the form, requests a JWT, and starts the authentication procedure of Unblu.
@@ -85,6 +87,7 @@ class SampleApp {
             });
     }
 
+	// tag::activateUnbluJwt[]
     /**
       * Starts an Unblu authentication session using a JWT.
       * @returns {Promise}, fulfilled when login succeeded, rejected when login failed.
@@ -108,7 +111,9 @@ class SampleApp {
                 }
             });
     }
+    // end::activateUnbluJwt[]
 
+    // tag::logout[]
     /**
       * Calls the Unblu logout endpoint.
       * @returns {Promise}, fulfilled when logout succeeded, rejected when logout failed.
@@ -133,4 +138,5 @@ class SampleApp {
                 }
             });
     }
+    // end::logout[]
 }
