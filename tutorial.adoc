@@ -46,9 +46,9 @@ com.unblu.identifier.siteEmbeddedSetup=false
 
 com.unblu.authentication.untrusted.sources=LOCAL
 
-com.unblu.authentication.jwt.jwkUrl=https://onlinebanking.example.com/api/jwk
-com.unblu.authentication.jwt.expectedIssuer=https://onlinebanking.example.com
-com.unblu.authentication.jwt.expectedAudience=https://unblu.example.com
+com.unblu.authentication.jwt.jwkUrl=https://application.example.com/api/jwk
+com.unblu.authentication.jwt.expectedIssuer=https://application.example.com
+com.unblu.authentication.jwt.expectedAudience=https://example.unblu.cloud
 com.unblu.authentication.jwt.useEncryption=false
 #com.unblu.authentication.jwt.encryptionKey=<private key, if encryption is enabled>
 
