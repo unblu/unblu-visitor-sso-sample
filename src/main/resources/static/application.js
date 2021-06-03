@@ -10,8 +10,8 @@ class SampleApp {
   }
 
   /**
-      * Check Unblu authentication and update UI state accordingly.
-      */
+    * Check Unblu authentication and update UI state accordingly.
+    */
   async init () {
     const authentication = document.getElementById('authentication');
     const signInForm = document.getElementById('sign-in-form');
@@ -37,10 +37,10 @@ class SampleApp {
 
   // tag::checkAuthentication[]
   /**
-      * Calls the authentication verification endpoint of Unblu.
-      *
-      * @returns {Promise<boolean>} Whether the user is authenticated
-      */
+    * Calls the authentication verification endpoint of Unblu.
+    *
+    * @returns {Promise<boolean>} Whether the user is authenticated
+    */
   async checkAuthentication () {
     const options = { credentials: 'include' }; // <1>
     return await fetch(this.unbluBaseUrl + '/rest/v3/authenticator/isAuthenticated', options)
@@ -56,9 +56,9 @@ class SampleApp {
   // end::checkAuthentication[]
 
   /**
-      * Reads user information from the form, requests a JWT, and starts the authentication procedure of Unblu.
-      * @see activateUnbluJwt
-      */
+    * Reads user information from the form, requests a JWT, and starts the authentication procedure of Unblu.
+    * @see activateUnbluJwt
+    */
   login () {
     const tokenRequest = {
       username: document.getElementById('username').value,
@@ -91,9 +91,9 @@ class SampleApp {
 
   // tag::activateUnbluJwt[]
   /**
-      * Starts an Unblu authentication session using a JWT.
-      * @returns {Promise}, fulfilled when login succeeded, rejected when login failed.
-      */
+    * Starts an Unblu authentication session using a JWT.
+    * @returns {Promise}, fulfilled when login succeeded, rejected when login failed.
+    */
   activateUnbluJwt (jwt) {
     const request = {
       method: 'POST',
@@ -117,9 +117,9 @@ class SampleApp {
 
   // tag::logout[]
   /**
-      * Calls the Unblu logout endpoint.
-      * @returns {Promise}, fulfilled when logout succeeded, rejected when logout failed.
-      */
+    * Calls the Unblu logout endpoint.
+    * @returns {Promise}, fulfilled when logout succeeded, rejected when logout failed.
+    */
   logout () {
     const request = {
       method: 'POST',
