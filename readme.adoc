@@ -1,15 +1,19 @@
 = Unblu Visitor Single Sign-On (SSO)
 :source-highlighter: rouge
 
-Visitor SSO Implementation Tutorial: https://unblu.github.io/unblu-visitor-sso-sample/[HTML]
+Be sure to review our https://unblu.github.io/unblu-visitor-sso-sample/[visitor SSO implementation tutorial] as well.
 
-== Run Sample Application
+== Running the sample application
+
+First, build the sample application from source:
 
 .Build from source
 [source,bash]
 ----
 ./gradlew bootRun
 ----
+
+The following command runs the sample application on port 8080 in a Docker container:
 
 .Run using Docker
 [source,bash]
@@ -33,17 +37,18 @@ curl -X POST \
 
 == Configuration
 
-The configuration `unblu.serverUrl` needs to point to a running Unblu installation with enabled ID propagation based on JWT.
+The sample application's configuration property `unblu.serverUrl` must point to a running Unblu installation.
+ID propagation based on JWT must be enabled on the Unblu server.
 
-.Change `src/main/resources/application.properties` to reconfigure this Sample App
+.Change `src/main/resources/application.properties` to reconfigure the sample application
 [source,ini]
 ----
 include::src/main/resources/application.properties[tag=config]
 ----
 
-== Test Data
+== Key pair for testing
 
-.Key pair for testing
+.Public key
 [source]
 ----
 -----BEGIN PUBLIC KEY-----
@@ -55,7 +60,11 @@ irTvvqHnOyC4Tjksa8aAYxYOCAnSSM/n5BgdIcXs/16esTadrHxL+VC4Y8Y71114
 cZMG1oCL4GdnwsiA4iismBcRtH0pEhQoU7rjDg/umt3CEkk1wLPx+3Icvi+39xCa
 dwIDAQAB
 -----END PUBLIC KEY-----
+----
 
+.Private key
+[source]
+----
 -----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCpt4w09CoBF4UQ
 2YTr9n1LjJZjIvnjeE7UoGwJrxEFxUhTMaRY7To3iYMxH6NaUwwABSt4rbykeZFB
