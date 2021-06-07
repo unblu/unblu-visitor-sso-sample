@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.13">
-<title>Unblu Visitor Single Sign-On (SSO)</title>
+<meta name="generator" content="Asciidoctor 2.0.15">
+<title>Unblu visitor single sign-on (SSO)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -652,30 +652,43 @@ pre.rouge {
 </head>
 <body class="article">
 <div id="header">
-<h1>Unblu Visitor Single Sign-On (SSO)</h1>
+<h1>Unblu visitor single sign-on (SSO)</h1>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_data_flow">Data flow</a></li>
+<li><a href="#_configuring_unblu_for_visitor_ss0">Configuring Unblu for visitor SS0</a></li>
+<li><a href="#_generating_an_rsa_key_pair_to_encrypt_the_jwt">Generating an RSA key pair to encrypt the JWT</a></li>
+<li><a href="#_generating_a_jwt">Generating a JWT</a></li>
+<li><a href="#_starting_an_unblu_authentication_session_using_a_jwt">Starting an Unblu authentication session using a JWT</a></li>
+<li><a href="#_ending_an_unblu_session">Ending an Unblu session</a></li>
+</ul>
+</div>
 </div>
 <div id="content">
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>A sample application to pass the identity properties of the user into a cross origin Unblu backend using a signed and encrypted Json Web Token (JWT).</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>After the login this app calls <code>POST <a href="https://unblu.example.com/rest/v3/authenticator/loginWithSecureToken" class="bare">https://unblu.example.com/rest/v3/authenticator/loginWithSecureToken</a></code>
-with the signed JWT in the request body.</p>
-</li>
-<li>
-<p>Unblu will then download the Json Web Key (JWK) used to sign the JWT from this sample app (i.e. <a href="https://onlinebanking.example.com/api/jwk" class="bare">https://onlinebanking.example.com/api/jwk</a>).</p>
-</li>
-<li>
-<p>Assuming the JWT is valid, Unblu sets a session id as a cookie on <code>unblu.example.com</code>.</p>
-</li>
-</ol>
+<p>This tutorial is intended as a guide for developers implementing Unblu&#8217;s visitor SSO using JSON Web Tokens (JWT) in an application.</p>
 </div>
 <div class="paragraph">
-<p>Unblu now uses the JWT in the cookie as the authentication.</p>
+<p>Adding visitor SSO to your application has a number of benefits:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Agents know who they are speaking to.</p>
+</li>
+<li>
+<p>Visitors can view their old conversations from different devices.</p>
+</li>
+<li>
+<p>Different people using the same device each has their own conversation history.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Before you continue, you may want to review the general introduction to Unblu Cloud SSO in our official <a href="https://www.unblu.com/en/docs/latest/knowledge-base/cloud-sso.html">documentation</a>.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -684,20 +697,59 @@ with the signed JWT in the request body.</p>
 <div class="title">Note</div>
 </td>
 <td class="content">
-Login using a JWT is only possible since Unblu 6.13.0!
+Logging in to Unblu using a JWT was introduced in Unblu 6.13.0.
 </td>
 </tr>
 </table>
 </div>
-<div class="admonitionblock caution">
+</div>
+</div>
+<div class="sect1">
+<h2 id="_data_flow">Data flow</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The diagram below illustrates the order in which data flows between a visitor, your application, and the Unblu server during visitor SSO.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="-0.5 -0.5 813 553" content="&lt;mxfile host=&quot;Electron&quot; modified=&quot;2021-06-04T08:56:59.615Z&quot; agent=&quot;5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/14.6.13 Chrome/89.0.4389.128 Electron/12.0.7 Safari/537.36&quot; etag=&quot;oP5y3UmSI7kw2NYmpbMT&quot; version=&quot;14.6.13&quot; type=&quot;device&quot;&gt;&lt;diagram id=&quot;WSgzDGeLXuhfTpE6_wTB&quot; name=&quot;Page-1&quot;&gt;7Vttd6I4FP41fqyHEIjwUa3O7pzOnp7p7LzsN8SoaSNhIbQ6v34TCGAI1dZB2zOrPaeSmxCSe5/n3ssFe3C83nxIgnj1ic0x7dnWfNOD1z3bBpbniy8p2RYS3/YKwTIhczWoFtyRn7g8U0kzMsepNpAzRjmJdWHIogiHXJMFScKe9GELRvWrxsESG4K7MKCm9BuZ85WSAuTXHX9gslypS3v2oOhYB+VgtZN0FczZ044ITnpwnDDGi6P1ZoypVF6pl+K86TO91cISHPGXnJBBCqPvX8LN+pPvWg/kFmz+unKLWR4DmqkNq8XybamBhGXRHMtJQA+OnlaE47s4CGXvk7C5kK34mqrulCfsodIUFJIFoXTMKEvy2eA0/1Qjd3rcsTtFQ9ETJKHCgdDRyNym2vkjTjje7IjUtj9gtsY82YohqtdVtlIQdJRBnmp7eiXcVjumdF0lDBSGltXMtZrFgdL0K7QOzq31CZJ/e7XegZ6BZ2mKRi2KbtEzgB3oGTP3A/i8pevr+398f3L/8WcEWvT8g2WJXBGe9WxExQJGs0RTPPo3k4QcLVjEr9IchkMxADjxpu4UR0v5HcQxJWHACYt+zYDyatNgTajU3OdsRh6U8E6sNz9nxbnweLYrV+MKpch/ckDaXzK2pDiISdoP2TrvCNN86HRRTCkO9UkLdgFHtdvo2QDQ0B87k1EbgAaTIZpYrSDsAlJIhxT0TUwBuwVU6FSYsg1MfSUp4UIdTQQIhx/Lw2xNh6EcAEdy4wIw9CaYYXrLxHkSOvB6xjgXtqsHDClZyg7OGkhhGackEgYow531pvAx/UnoLlBgAquS6zDpyMPblg4Tz0SJ0wKSwalAAg2QTCKOk12fU3iQMMFzsW0S0NTAD47mQ5nBSHxQFj58WZHonbqNPdYVuyhPVM0poeUGxNaT7XeJ4j6EZfuHQnXeuN5ore1u6xYnRNgLJ0p4RHDjQbLE/HAIwXMtTXwWiFdW3/I9WwPjVYvPctvyDSVLMBUh5VFPQNsgqlZxy4jY1bNcAH4D5WkODnXWbsLYmAj4et4Emz61UN6eicqBbLFIsTYmZ1WlvuOJ5hhE+4x5lkQm0z5++/J/ZNgRnHgp1q0+0HHugbPiHDbgeSzOmxMZhHkHODfv0/6OZjT7zbPO6XQEETJAD9twPR650LI6umFsuNC2pLMN2SfLJ5Bh/jtBcyH5vbxam5t6bUaxIbxIKET0Kpp5PtF3bFe165RCNrY7jWZCUaUnMqxbSEtQ+tCtMpbXJCnPwjMtdd/bXzU4mLK4r05ZgINcDfA2OqsnR7bQpl9/dHcMHGFLq/405n+pm2+SGoBBZ25e8C3Y7oyI5RnpKQLBoMUTyLWlOE3zMoT157WcQx6FjD0QfPEPrf5Bcw6D/b7hl1MlwTHbQY6erzjn5JiBfugemS2h5kSo35jqJERqXw30nltNzbtizk5ZCMwq0A0LZECOsxkloTh4wNsL81rv9YEeR91DUbSK6O4OZ8Fewkpe3im9s4Sv2JJFAZ3U0peF4X3htevKgchQfFePwvCsdQPkNKjkHXk/BRuuxrHf3/0UMCt04wQHHMur55l1KguwKsG2zHJClpJoKRGUkMfitAvhR2GWPFY3nzr7uwihFrI8DVlXzlkrDs3nW07zAeGxMdSY6CBDSqXYUOcs0uf59QBbPYhXV3D1p8wnCq9mWe9rQMm8INpBSl5C8NkYCYAOwKvBeWOW24hZzpGMNCYCRzLS1fWBvK4JOYDNjPcchDTrj2W6tEMtSkmc4sN1xyCNi2eXC7KR4HwjynlmwXEAZzOM9hQodSpGLNqbS77iOXcDf23vTrQ9wWzivbtXJ8ySI7xYvEOL2+/O4mZpyb5YvEuLN+6LqpLMm1ncMyzuXCzepcWbL8T5b2xw3zD44GLwExq8CutvZfFqC7XF0cXiHVp8YDXuwC33jS1ulqbdi8U7tDi0dY47LWXaU1m89blwS5Z2sPxdvyciy+X1mBsmXzjNTX+POd8qAwQZZzowjqrKt9deDrywdPjFjoMl+zLuHa7Zq4EHSyAvrls8Y1nRrH/5Udyl17+fgZP/AA==&lt;/diagram&gt;&lt;/mxfile&gt;" width="Embedded"><defs/><g><rect x="1" y="1" width="810" height="550" rx="11" ry="11" fill="#ffffff" stroke="#5c5f6a" stroke-width="3" pointer-events="all"/><rect x="122" y="21" width="80" height="130" rx="12" ry="12" fill="#e6e6e6" stroke="#5c5f6a" stroke-width="3" pointer-events="all"/><rect x="102" y="351" width="120" height="60" rx="9" ry="9" fill="#a9c4eb" stroke="#7ea6e0" stroke-width="3" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 118px; height: 1px; padding-top: 381px; margin-left: 103px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 14px; font-family: Rubik; color: #FFFFFF; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">Your web<br style="font-size: 14px" />application</div></div></div></foreignObject><text x="162" y="385" fill="#FFFFFF" font-family="Rubik" font-size="14px" text-anchor="middle">Your web...</text></switch></g><ellipse cx="162" cy="49.75" rx="10" ry="8.75" fill="#ffffff" stroke="#5c5f6a" stroke-width="2" pointer-events="all"/><path d="M 162 58.5 L 162 87.67 M 162 64.33 L 142 64.33 M 162 64.33 L 182 64.33 M 162 87.67 L 142 111 M 162 87.67 L 182 111" fill="none" stroke="#5c5f6a" stroke-width="2" stroke-miterlimit="10" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 118px; margin-left: 162px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 14px; font-family: Rubik; color: #5c5f6a; line-height: 1.2; pointer-events: all; white-space: nowrap; ">Visitor</div></div></div></foreignObject><text x="162" y="132" fill="#5c5f6a" font-family="Rubik" font-size="14px" text-anchor="middle">Visitor</text></switch></g><path d="M 142 151 L 141.63 334.76" fill="none" stroke="#5c5f6a" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 141.6 348.76 L 136.97 334.75 L 146.3 334.77 Z" fill="#5c5f6a" stroke="#5c5f6a" stroke-width="2" stroke-miterlimit="10" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 241px; margin-left: 52px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 14px; font-family: Rubik; color: #5c5f6a; line-height: 1.2; pointer-events: all; background-color: #ffffff; white-space: nowrap; ">Enter<br />credentials</div></div></div></foreignObject><text x="52" y="245" fill="#5c5f6a" font-family="Rubik" font-size="14px" text-anchor="middle">Enter...</text></switch></g><path d="M 181 351 L 181 167.24" fill="none" stroke="#5c5f6a" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 181 153.24 L 185.67 167.24 L 176.33 167.24 Z" fill="#5c5f6a" stroke="#5c5f6a" stroke-width="2" stroke-miterlimit="10" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 241px; margin-left: 262px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 14px; font-family: Rubik; color: #5c5f6a; line-height: 1.2; pointer-events: all; background-color: #ffffff; white-space: nowrap; ">Return<br />JWT</div></div></div></foreignObject><text x="262" y="245" fill="#5c5f6a" font-family="Rubik" font-size="14px" text-anchor="middle">Return...</text></switch></g><rect x="442" y="51" width="150" height="70" rx="10.5" ry="10.5" fill="#ffb366" stroke="#cb5300" stroke-width="3" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 148px; height: 1px; padding-top: 86px; margin-left: 443px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 14px; font-family: Rubik; color: #FFFFFF; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">Unblu</div></div></div></foreignObject><text x="517" y="90" fill="#FFFFFF" font-family="Rubik" font-size="14px" text-anchor="middle">Unblu</text></switch></g><path d="M 201.2 76.25 L 424.86 75.75" fill="none" stroke="#5c5f6a" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 438.86 75.72 L 424.87 80.41 L 424.85 71.08 Z" fill="#5c5f6a" stroke="#5c5f6a" stroke-width="2" stroke-miterlimit="10" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 50px; margin-left: 303px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 14px; font-family: Rubik; color: #5c5f6a; line-height: 1.2; pointer-events: all; background-color: #ffffff; white-space: nowrap; ">Send JWT</div></div></div></foreignObject><text x="303" y="54" fill="#5c5f6a" font-family="Rubik" font-size="14px" text-anchor="middle">Send JWT</text></switch></g><path d="M 442 96 L 332 97.38 Q 322 97.5 312 97.5 L 218.24 97.5" fill="none" stroke="#5c5f6a" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 204.24 97.5 L 218.24 92.83 L 218.24 102.17 Z" fill="#5c5f6a" stroke="#5c5f6a" stroke-width="2" stroke-miterlimit="10" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 131px; margin-left: 352px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 14px; font-family: Rubik; color: #5c5f6a; line-height: 1.2; pointer-events: all; background-color: #ffffff; white-space: nowrap; ">Set session ID in cookie</div></div></div></foreignObject><text x="352" y="135" fill="#5c5f6a" font-family="Rubik" font-size="14px" text-anchor="middle">Set sess...</text></switch></g><path d="M 517 121 L 517 371 Q 517 381 507 381 L 238.24 381" fill="none" stroke="#5c5f6a" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 224.24 381 L 238.24 376.33 L 238.24 385.67 Z" fill="#5c5f6a" stroke="#5c5f6a" stroke-width="2" stroke-miterlimit="10" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 411px; margin-left: 362px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 14px; font-family: Rubik; color: #5c5f6a; line-height: 1.2; pointer-events: all; background-color: #ffffff; white-space: nowrap; ">Load public key</div></div></div></foreignObject><text x="362" y="415" fill="#5c5f6a" font-family="Rubik" font-size="14px" text-anchor="middle">Load pub...</text></switch></g><path d="M 122 411 Q 152 481 192.56 424.21" fill="none" stroke="#5c5f6a" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 200.7 412.82 L 196.36 426.92 L 188.77 421.5 Z" fill="#5c5f6a" stroke="#5c5f6a" stroke-width="2" stroke-miterlimit="10" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 521px; margin-left: 162px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 14px; font-family: Rubik; color: #5c5f6a; line-height: 1.2; pointer-events: all; background-color: #ffffff; white-space: nowrap; ">Create and sign JWT <br />using private key</div></div></div></foreignObject><text x="162" y="525" fill="#5c5f6a" font-family="Rubik" font-size="14px" text-anchor="middle">Create a...</text></switch></g><path d="M 592 101 Q 672 91 607.75 74.94" fill="none" stroke="#5c5f6a" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 594.17 71.54 L 608.88 70.41 L 606.62 79.47 Z" fill="#5c5f6a" stroke="#5c5f6a" stroke-width="2" stroke-miterlimit="10" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 91px; margin-left: 742px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 14px; font-family: Rubik; color: #5c5f6a; line-height: 1.2; pointer-events: all; background-color: #ffffff; white-space: nowrap; ">Validate JWT <br />using public key</div></div></div></foreignObject><text x="742" y="95" fill="#5c5f6a" font-family="Rubik" font-size="14px" text-anchor="middle">Validate...</text></switch></g><ellipse cx="112" cy="241" rx="20" ry="20" fill="#73bbe6" stroke="none" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 38px; height: 1px; padding-top: 241px; margin-left: 93px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 18px; font-family: Rubik; color: #FFFFFF; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">1</div></div></div></foreignObject><text x="112" y="246" fill="#FFFFFF" font-family="Rubik" font-size="18px" text-anchor="middle">1</text></switch></g><ellipse cx="212" cy="241" rx="20" ry="20" fill="#73bbe6" stroke="none" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 38px; height: 1px; padding-top: 241px; margin-left: 193px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 18px; font-family: Rubik; color: #FFFFFF; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">3</div></div></div></foreignObject><text x="212" y="246" fill="#FFFFFF" font-family="Rubik" font-size="18px" text-anchor="middle">3</text></switch></g><ellipse cx="162" cy="481" rx="20" ry="20" fill="#73bbe6" stroke="none" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 38px; height: 1px; padding-top: 481px; margin-left: 143px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 18px; font-family: Rubik; color: #FFFFFF; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">2</div></div></div></foreignObject><text x="162" y="486" fill="#FFFFFF" font-family="Rubik" font-size="18px" text-anchor="middle">2</text></switch></g><ellipse cx="242" cy="50" rx="20" ry="20" fill="#73bbe6" stroke="none" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 38px; height: 1px; padding-top: 50px; margin-left: 223px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 18px; font-family: Rubik; color: #FFFFFF; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">4</div></div></div></foreignObject><text x="242" y="55" fill="#FFFFFF" font-family="Rubik" font-size="18px" text-anchor="middle">4</text></switch></g><ellipse cx="242" cy="131" rx="20" ry="20" fill="#73bbe6" stroke="none" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 38px; height: 1px; padding-top: 131px; margin-left: 223px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 18px; font-family: Rubik; color: #FFFFFF; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">7</div></div></div></foreignObject><text x="242" y="136" fill="#FFFFFF" font-family="Rubik" font-size="18px" text-anchor="middle">7</text></switch></g><ellipse cx="665" cy="86" rx="20" ry="20" fill="#73bbe6" stroke="none" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 38px; height: 1px; padding-top: 86px; margin-left: 646px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 18px; font-family: Rubik; color: #FFFFFF; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">6</div></div></div></foreignObject><text x="665" y="91" fill="#FFFFFF" font-family="Rubik" font-size="18px" text-anchor="middle">6</text></switch></g><ellipse cx="282" cy="411" rx="20" ry="20" fill="#73bbe6" stroke="none" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 38px; height: 1px; padding-top: 411px; margin-left: 263px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 18px; font-family: Rubik; color: #FFFFFF; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">5</div></div></div></foreignObject><text x="282" y="416" fill="#FFFFFF" font-family="Rubik" font-size="18px" text-anchor="middle">5</text></switch></g></g><switch><g requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"/><a transform="translate(0,-5)" xlink:href="https://www.diagrams.net/doc/faq/svg-export-text-problems" target="_blank"><text text-anchor="middle" font-size="10px" x="50%" y="100%">Viewer does not support full SVG 1.1</text></a></switch></svg>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>The visitor is authenticated using your application&#8217;s standard authentication mechanism.</p>
+</li>
+<li>
+<p>The application creates a JWT and signs it with a private key.</p>
+</li>
+<li>
+<p>The application sends the JWT to the visitor&#8217;s browser.</p>
+</li>
+<li>
+<p>The visitor&#8217;s browser sends the JWT to Unblu (<code>POST /unblu/rest/v3/authenticator/loginWithSecureToken</code>)</p>
+</li>
+<li>
+<p>Unblu loads the public key used to sign the JWT from the application.
+Unblu will cache the keys and therefore not request it for every validation.</p>
+</li>
+<li>
+<p>Unblu validates the JWT signature and attributes (<code>iss</code>, <code>aud</code>, <code>exp</code>).</p>
+</li>
+<li>
+<p>Unblu sets a session cookie in the visitor&#8217;s browser.</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock important">
 <table>
 <tr>
 <td class="icon">
-<div class="title">Caution</div>
+<div class="title">Important</div>
 </td>
 <td class="content">
-The Unblu backend and the host application must run on the same second-level domain (e.g. <code>example.com</code>).
-Otherwise, some browsers (i.e. Safari) will treat the Unblu authentication cookie as a third-party cookie and therefore block it.
+The Unblu backend and the host application must be running in the same second-level domain (e.g. <code>example.com</code>).
+If they don&#8217;t, some browsers&#8201;&#8212;&#8201;Safari, for example&#8201;&#8212;&#8201;will treat the Unblu authentication cookie as a third-party cookie and block it.
 </td>
 </tr>
 </table>
@@ -705,47 +757,67 @@ Otherwise, some browsers (i.e. Safari) will treat the Unblu authentication cooki
 </div>
 </div>
 <div class="sect1">
-<h2 id="_configuration">Configuration</h2>
+<h2 id="_configuring_unblu_for_visitor_ss0">Configuring Unblu for visitor SS0</h2>
 <div class="sectionbody">
-<div class="listingblock">
-<div class="title">Change <code>application.properties</code> to reconfigure this Sample App</div>
-<div class="content">
-<pre class="rouge highlight"><code data-lang="ini"><span class="py">unblu.baseUrl</span><span class="p">=</span><span class="s">http://sample.unblu-test.com:7777/unblu</span>
-<span class="py">unblu.apiKey</span><span class="p">=</span><span class="s">MZsy5sFESYqU7MawXZgR_w</span>
-<span class="py">unblu.publicKey</span><span class="p">=</span><span class="s">classpath:unblu.pub</span>
-<span class="py">jwt.issuer</span><span class="p">=</span><span class="s">https://onlinebanking.example.com</span>
-<span class="py">jwt.audience</span><span class="p">=</span><span class="s">https://unblu.example.com</span>
-<span class="py">jwt.validFor</span><span class="p">=</span><span class="s">1h</span>
-<span class="py">jwt.encryption</span><span class="p">=</span><span class="s">false</span></code></pre>
+<div class="paragraph">
+<p>By default, visitor SSO is disabled.
+Use the configuration below to activate it.</p>
 </div>
+<div class="listingblock">
+<div class="title">Visitor SSO Configuration in Unblu</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="ini"><span class="c"># Ensure that /unblu (visitor) and /co-unblu (agent) are separated
+# and authentication cookies are set on the correct path
+</span><span class="py">com.unblu.identifier.publicPathPrefix</span><span class="p">=</span><span class="s">${systemIdentifier}</span>
+<span class="py">com.unblu.identifier.restrictedPathPrefix</span><span class="p">=</span><span class="s">co-${systemIdentifier}</span>
+
+<span class="c"># Visitor SSO is typically used in a cross-site setup, so we disable
+# site-embedded mode
+</span><span class="py">com.unblu.identifier.siteEmbeddedSetup</span><span class="p">=</span><span class="s">false</span>
+
+<span class="py">com.unblu.authentication.untrusted.sources</span><span class="p">=</span><span class="s">LOCAL</span>
+
+<span class="py">com.unblu.authentication.jwt.jwkUrl</span><span class="p">=</span><span class="s">https://application.example.com/api/jwk</span>
+<span class="py">com.unblu.authentication.jwt.expectedIssuer</span><span class="p">=</span><span class="s">https://application.example.com</span>
+<span class="py">com.unblu.authentication.jwt.expectedAudience</span><span class="p">=</span><span class="s">https://example.unblu.cloud</span>
+<span class="py">com.unblu.authentication.jwt.useEncryption</span><span class="p">=</span><span class="s">false</span>
+<span class="c">#com.unblu.authentication.jwt.encryptionKey=&lt;private key, if encryption is enabled&gt;
+</span>
+<span class="c"># Enable authenticator/loginWithSecureToken
+</span><span class="py">com.unblu.authentication.tokenSignup.enabled</span><span class="p">=</span><span class="s">true</span>
+<span class="py">com.unblu.authentication.tokenSignup.claimMapping.username</span><span class="p">=</span><span class="s">username</span>
+<span class="py">com.unblu.authentication.tokenSignup.claimMapping.email</span><span class="p">=</span><span class="s">email</span>
+<span class="py">com.unblu.authentication.tokenSignup.claimMapping.firstName</span><span class="p">=</span><span class="s">firstName</span>
+<span class="py">com.unblu.authentication.tokenSignup.claimMapping.lastName</span><span class="p">=</span><span class="s">lastName</span>
+
+<span class="c"># To use cross-site cookies, most browsers require that you use HTTPS.
+# Enable the configuration properties below if you run the application without
+# a reverse proxy providing HTTPS connections.
+#com.unblu.identifier.cookieSecureFlag=true
+#com.unblu.runtime.jetty.securehttpenabled=true
+#com.unblu.runtime.jetty.keystorepath=tls.p12
+</span><span class="err">#</span><span class="py">com.unblu.runtime.jetty.keystorepassword</span><span class="p">=</span><span class="s">password</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The URL configured in the <code>jwkUrl</code> property must be accessible from the Unblu server.
+<code>expectedIssuer</code> and <code>expectedAudience</code> must match the <code>iss</code> and <code>aud</code> claims as set by the application.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_unblu_backend">Unblu Backend</h2>
+<h2 id="_generating_an_rsa_key_pair_to_encrypt_the_jwt">Generating an RSA key pair to encrypt the JWT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The configuration <code>unblu.baseUrl</code> needs to point to a running Unblu installation with enabled ID propagation based on JWT.</p>
+<p>You can encrypt the JWT.
+This will hide the content of the JWT payload from the visitor if they intercept the request in their browser.</p>
 </div>
-<div class="listingblock">
-<div class="title">JWT Configuration in Unblu</div>
-<div class="content">
-<pre class="rouge highlight"><code data-lang="ini"><span class="py">com.unblu.identifier.restrictedPathPrefix</span><span class="p">=</span><span class="s">co-${systemIdentifier}</span>
-
-<span class="py">com.unblu.authentication.untrusted.sources</span><span class="p">=</span><span class="s">LOCAL</span>
-
-<span class="py">com.unblu.authentication.jwt.jwkUrl</span><span class="p">=</span><span class="s">https://onlinebanking.example.com/api/jwk</span>
-<span class="py">com.unblu.authentication.jwt.expectedIssuer</span><span class="p">=</span><span class="s">https://onlinebanking.example.com</span>
-<span class="py">com.unblu.authentication.jwt.expectedAudience</span><span class="p">=</span><span class="s">https://unblu.example.com</span>
-<span class="py">com.unblu.authentication.jwt.useEncryption</span><span class="p">=</span><span class="s">false</span>
-<span class="py">com.unblu.authentication.jwt.encryptionKey</span><span class="p">=</span><span class="s">-----BEGIN PRIVATE KEY-----</span><span class="se">\n</span><span class="s">MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCpt4w09CoBF4UQ</span><span class="se">\n</span><span class="s">2YTr9n1LjJZjIvnjeE7UoGwJrxEFxUhTMaRY7To3iYMxH6NaUwwABSt4rbykeZFB</span><span class="se">\n</span><span class="s">vus4oRBVqcisBXzP8+USX9u1cuhteNGqvXpVsw0YeuhIYiYTTkzAcFHTi/pJDrdd</span><span class="se">\n</span><span class="s">pOVMnpCKtO++oec7ILhOOSxrxoBjFg4ICdJIz+fkGB0hxez/Xp6xNp2sfEv5ULhj</span><span class="se">\n</span><span class="s">xjvXXXjg6vD0u3BCt+BxRhpRpPRwbPmwGeWY/sjPttBXhPKIBIchRqRfRHOz3MJJ</span><span class="se">\n</span><span class="s">nQonRItxkwbWgIvgZ2fCyIDiKKyYFxG0fSkSFChTuuMOD+6a3cISSTXAs/H7chy+</span><span class="se">\n</span><span class="s">L7f3EJp3AgMBAAECggEAKcaomJBRlps3ggJJGdw+003z5stBP6DppqUmcuvJAOai</span><span class="se">\n</span><span class="s">+veJQOqEHg+XX4wuJZmzpn2fScFaYhIak1hvhiz/XFbCsrVXF8ktZex6pJt4YxoO</span><span class="se">\n</span><span class="s">Yjzp1BaS7qeybb7bKH1pnyUGv1ABd+JLeJ2SY93ULpCDQyWPSZqwQ3EHYjAmgj0Q</span><span class="se">\n</span><span class="s">zWnxNAwqz8hKkHvNimSZmZFPqAA6IOeoRJY/yBPjl/CTbivaIoHnPCs1bGJ6wtoX</span><span class="se">\n</span><span class="s">mQVEv8UrEUITj/W3pSWIWpYjSkxLIAH6CrstusPIdESX9a2XmpEbMblKhM4TTYgz</span><span class="se">\n</span><span class="s">Uu6KH8CVWqJEqL/EkoTv2Z+ZmprgNIJ/9XS26fgSIQKBgQDblu4MVn5zaKY0JPwE</span><span class="se">\n</span><span class="s">F0sLQ02vaRirfjtBsQpiuo7czmVz02I1xwnj/j8GNOGQxRdDPXblR19c0zmSQq4X</span><span class="se">\n</span><span class="s">fX3PYq+ZZv9OTU1gaEqx2BirNk/IifI0G8R9xdy7/KvFXA4cbMdrYyPbx6jy1e6S</span><span class="se">\n</span><span class="s">b0Hlb3JQFqHUinP6cMXuvqWUVQKBgQDF26RE7lxkGypmBgTIoC/zLkKqtB/9pWTq</span><span class="se">\n</span><span class="s">2yDVRFuoxTRgRLdb5c+6Vmyty4Pc846s8MAb2eA/5SzeU6kYcNTVUpPGmVDuG6P6</span><span class="se">\n</span><span class="s">yIvpIaKGieSo93kfFMuzizoolaARQxa4Cgt7D3F0rTXwzl86fdmmcz2tc+r4EEZ9</span><span class="se">\n</span><span class="s">VAELUfOfmwKBgAkvHdOsRmujQ9hId7XgF4ZoETa16Y86n1XXBr0sWk9H3pxiief/</span><span class="se">\n</span><span class="s">5B0CBDbJPWnlpFxulKtwOb/TIcRJP6jB2eIzmW6MDT+EIilXE1Cu3hFDG0Ei69tc</span><span class="se">\n</span><span class="s">EfLEtL+0CKcfe4Oa1RhbtCM8DYfihLDhMFtdNuW8nJYcGE+wKccbeCdlAoGAaQLE</span><span class="se">\n</span><span class="s">8azMrnjYjON+4HhcWqXfzjfhjr6cjCWXDHnGaBGaVcnCw2x6TryV27vbFYbS36i7</span><span class="se">\n</span><span class="s">XUzKvz7EDI+8fHNOEpZMRiiTEnzrECwmTaqDVwKSsLb/uuZPotAvIuEe3mqMAUub</span><span class="se">\n</span><span class="s">gknU/ob7zP3K/wFSZgxd3NRcDiKdNuFB2J87PScCgYEAgwC7RkLO1IYS+FZ0aHLL</span><span class="se">\n</span><span class="s">rkbEqT5CHtnf2eLW6xLYhxHFFacpbhLVOAs6bXT5NWkm4UmgZTBEAwxtJ+EjXMOn</span><span class="se">\n</span><span class="s">LQJXTsDYrWTWzyShBCfID+6kT5/JLGK06CmAnOXadd2ESY3d+QdKE0jE1cbTp2Q8</span><span class="se">\n</span><span class="s">IIQdfNOVVaTOS+OHMuwNraA=</span><span class="se">\n</span><span class="s">-----END PRIVATE KEY-----</span>
-
-<span class="py">com.unblu.authentication.tokenSignup.enabled</span><span class="p">=</span><span class="s">true</span>
-<span class="py">com.unblu.authentication.tokenSignup.claimMapping.username</span><span class="p">=</span><span class="s">username</span>
-<span class="py">com.unblu.authentication.tokenSignup.claimMapping.email</span><span class="p">=</span><span class="s">email</span>
-<span class="py">com.unblu.authentication.tokenSignup.claimMapping.firstName</span><span class="p">=</span><span class="s">firstName</span>
-<span class="py">com.unblu.authentication.tokenSignup.claimMapping.lastName</span><span class="p">=</span><span class="s">lastName</span></code></pre>
+<div class="paragraph">
+<p>To use JWT encryption, generate an RSA key pair.
+Encryption uses a separate key pair, and the application uses Unblu&#8217;s public key to encrypt the JWT after signing it with its own private key.</p>
 </div>
+<div class="paragraph">
+<p>The snippet belows shows how to generate an RSA key pair using <code>openssl</code>.</p>
 </div>
 <div class="listingblock">
 <div class="title">Generate RSA key pair</div>
@@ -754,47 +826,266 @@ Otherwise, some browsers (i.e. Safari) will treat the Unblu authentication cooki
 openssl rsa <span class="nt">-pubout</span> <span class="nt">-in</span> unblu.pem <span class="nt">-out</span> unblu_public.pem</code></pre>
 </div>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_generating_a_jwt">Generating a JWT</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The code samples that follow are part of a <a href="https://github.com/unblu/unblu-visitor-sso-sample">sample implementation</a> of visitor SSO and may be freely copied.</p>
+</div>
+<div class="paragraph">
+<p>The application needs to create a JWT signed with an RSA key pair and make it accessible from the browser JavaScript after the user authenticated with his application specific credentials.</p>
+</div>
+<div class="paragraph">
+<p>The JWT must be signed with a key pair referenced by its Key ID (<code>kid</code>).
+It must include the user attributes as claims.
+The claims must be named as configured in the <a href="https://www.unblu.com/en/docs/latest/reference/configuration-properties.html#com-unblu-platform-server-core-auth-configuration-claimmappingconfiguration" target="_blank" rel="noopener"><code>claimMapping</code></a> in the Unblu configuration.</p>
+</div>
 <div class="listingblock">
-<div class="title">Key pair for testing</div>
+<div class="title">Decoded sample JWT</div>
 <div class="content">
-<pre class="rouge highlight"><code>-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqbeMNPQqAReFENmE6/Z9
-S4yWYyL543hO1KBsCa8RBcVIUzGkWO06N4mDMR+jWlMMAAUreK28pHmRQb7rOKEQ
-VanIrAV8z/PlEl/btXLobXjRqr16VbMNGHroSGImE05MwHBR04v6SQ63XaTlTJ6Q
-irTvvqHnOyC4Tjksa8aAYxYOCAnSSM/n5BgdIcXs/16esTadrHxL+VC4Y8Y71114
-4Orw9LtwQrfgcUYaUaT0cGz5sBnlmP7Iz7bQV4TyiASHIUakX0Rzs9zCSZ0KJ0SL
-cZMG1oCL4GdnwsiA4iismBcRtH0pEhQoU7rjDg/umt3CEkk1wLPx+3Icvi+39xCa
-dwIDAQAB
------END PUBLIC KEY-----
+<pre class="rouge highlight"><code>Token header
+------------
+{
+"typ": "JWT",
+"alg": "RS256",
+"kid": "5d2acf7b-b5e3-4a08-8e71-0953f8cdf1f6"
+}
 
------BEGIN PRIVATE KEY-----
-MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCpt4w09CoBF4UQ
-2YTr9n1LjJZjIvnjeE7UoGwJrxEFxUhTMaRY7To3iYMxH6NaUwwABSt4rbykeZFB
-vus4oRBVqcisBXzP8+USX9u1cuhteNGqvXpVsw0YeuhIYiYTTkzAcFHTi/pJDrdd
-pOVMnpCKtO++oec7ILhOOSxrxoBjFg4ICdJIz+fkGB0hxez/Xp6xNp2sfEv5ULhj
-xjvXXXjg6vD0u3BCt+BxRhpRpPRwbPmwGeWY/sjPttBXhPKIBIchRqRfRHOz3MJJ
-nQonRItxkwbWgIvgZ2fCyIDiKKyYFxG0fSkSFChTuuMOD+6a3cISSTXAs/H7chy+
-L7f3EJp3AgMBAAECggEAKcaomJBRlps3ggJJGdw+003z5stBP6DppqUmcuvJAOai
-+veJQOqEHg+XX4wuJZmzpn2fScFaYhIak1hvhiz/XFbCsrVXF8ktZex6pJt4YxoO
-Yjzp1BaS7qeybb7bKH1pnyUGv1ABd+JLeJ2SY93ULpCDQyWPSZqwQ3EHYjAmgj0Q
-zWnxNAwqz8hKkHvNimSZmZFPqAA6IOeoRJY/yBPjl/CTbivaIoHnPCs1bGJ6wtoX
-mQVEv8UrEUITj/W3pSWIWpYjSkxLIAH6CrstusPIdESX9a2XmpEbMblKhM4TTYgz
-Uu6KH8CVWqJEqL/EkoTv2Z+ZmprgNIJ/9XS26fgSIQKBgQDblu4MVn5zaKY0JPwE
-F0sLQ02vaRirfjtBsQpiuo7czmVz02I1xwnj/j8GNOGQxRdDPXblR19c0zmSQq4X
-fX3PYq+ZZv9OTU1gaEqx2BirNk/IifI0G8R9xdy7/KvFXA4cbMdrYyPbx6jy1e6S
-b0Hlb3JQFqHUinP6cMXuvqWUVQKBgQDF26RE7lxkGypmBgTIoC/zLkKqtB/9pWTq
-2yDVRFuoxTRgRLdb5c+6Vmyty4Pc846s8MAb2eA/5SzeU6kYcNTVUpPGmVDuG6P6
-yIvpIaKGieSo93kfFMuzizoolaARQxa4Cgt7D3F0rTXwzl86fdmmcz2tc+r4EEZ9
-VAELUfOfmwKBgAkvHdOsRmujQ9hId7XgF4ZoETa16Y86n1XXBr0sWk9H3pxiief/
-5B0CBDbJPWnlpFxulKtwOb/TIcRJP6jB2eIzmW6MDT+EIilXE1Cu3hFDG0Ei69tc
-EfLEtL+0CKcfe4Oa1RhbtCM8DYfihLDhMFtdNuW8nJYcGE+wKccbeCdlAoGAaQLE
-8azMrnjYjON+4HhcWqXfzjfhjr6cjCWXDHnGaBGaVcnCw2x6TryV27vbFYbS36i7
-XUzKvz7EDI+8fHNOEpZMRiiTEnzrECwmTaqDVwKSsLb/uuZPotAvIuEe3mqMAUub
-gknU/ob7zP3K/wFSZgxd3NRcDiKdNuFB2J87PScCgYEAgwC7RkLO1IYS+FZ0aHLL
-rkbEqT5CHtnf2eLW6xLYhxHFFacpbhLVOAs6bXT5NWkm4UmgZTBEAwxtJ+EjXMOn
-LQJXTsDYrWTWzyShBCfID+6kT5/JLGK06CmAnOXadd2ESY3d+QdKE0jE1cbTp2Q8
-IIQdfNOVVaTOS+OHMuwNraA=
------END PRIVATE KEY-----</code></pre>
+Token claims
+------------
+{
+"aud": "https://example.unblu.cloud",
+"email": "peter.muster@example.com",
+"exp": 1622640746,
+"firstName": "Peter",
+"iat": 1622637146,
+"iss": "https://application.example.com",
+"lastName": "Muster",
+"username": "pmuster"
+}</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+You can check a JWT with a service such as <a href="https://jwt.io/">jwt.io</a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">Create a JWT in Kotlin using the <a href="https://connect2id.com/products/nimbus-jose-jwt">Nimbus</a> library</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="kotlin"><span class="kd">val</span> <span class="py">header</span> <span class="p">=</span> <span class="nc">JWSHeader</span><span class="p">.</span><span class="nc">Builder</span><span class="p">(</span><span class="nc">JWSAlgorithm</span><span class="p">.</span><span class="nc">RS256</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">type</span><span class="p">(</span><span class="nc">JOSEObjectType</span><span class="p">.</span><span class="nc">JWT</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">keyID</span><span class="p">(</span><span class="n">key</span><span class="p">.</span><span class="n">keyID</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">build</span><span class="p">()</span>
+<span class="kd">val</span> <span class="py">expiration</span> <span class="p">=</span> <span class="nc">Date</span><span class="p">(</span><span class="nc">System</span><span class="p">.</span><span class="nf">currentTimeMillis</span><span class="p">()</span> <span class="p">+</span> <span class="n">configuration</span><span class="p">.</span><span class="n">validFor</span><span class="p">.</span><span class="nf">toMillis</span><span class="p">())</span>
+<span class="kd">val</span> <span class="py">payload</span> <span class="p">=</span> <span class="nc">JWTClaimsSet</span><span class="p">.</span><span class="nc">Builder</span><span class="p">()</span>
+    <span class="p">.</span><span class="nf">issuer</span><span class="p">(</span><span class="n">configuration</span><span class="p">.</span><span class="n">issuer</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">audience</span><span class="p">(</span><span class="n">configuration</span><span class="p">.</span><span class="n">audience</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">issueTime</span><span class="p">(</span><span class="nc">Date</span><span class="p">())</span>
+    <span class="p">.</span><span class="nf">expirationTime</span><span class="p">(</span><span class="n">expiration</span><span class="p">)</span> // <b class="conum">(1)</b>
+    <span class="p">.</span><span class="nf">claim</span><span class="p">(</span><span class="s">"email"</span><span class="p">,</span> <span class="n">userInfo</span><span class="p">.</span><span class="n">email</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">claim</span><span class="p">(</span><span class="s">"username"</span><span class="p">,</span> <span class="n">userInfo</span><span class="p">.</span><span class="n">username</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">claim</span><span class="p">(</span><span class="s">"firstName"</span><span class="p">,</span> <span class="n">userInfo</span><span class="p">.</span><span class="n">firstname</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">claim</span><span class="p">(</span><span class="s">"lastName"</span><span class="p">,</span> <span class="n">userInfo</span><span class="p">.</span><span class="n">lastname</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">build</span><span class="p">()</span>
+<span class="kd">val</span> <span class="py">signedJWT</span> <span class="p">=</span> <span class="nc">SignedJWT</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+
+<span class="n">signedJWT</span><span class="p">.</span><span class="nf">sign</span><span class="p">(</span><span class="n">signer</span><span class="p">)</span>
+
+<span class="kd">val</span> <span class="py">jwt</span><span class="p">:</span> <span class="nc">String</span> <span class="p">=</span> <span class="k">if</span> <span class="p">(</span><span class="n">configuration</span><span class="p">.</span><span class="n">encryption</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Create JWE object with signed JWT as payload</span>
+    <span class="kd">val</span> <span class="py">jweHeader</span> <span class="p">=</span> <span class="nc">JWEHeader</span><span class="p">.</span><span class="nc">Builder</span><span class="p">(</span><span class="nc">JWEAlgorithm</span><span class="p">.</span><span class="nc">RSA_OAEP_256</span><span class="p">,</span> <span class="nc">EncryptionMethod</span><span class="p">.</span><span class="nc">A256GCM</span><span class="p">)</span>
+        <span class="p">.</span><span class="nf">contentType</span><span class="p">(</span><span class="s">"JWT"</span><span class="p">)</span>
+        <span class="p">.</span><span class="nf">build</span><span class="p">()</span>
+    <span class="kd">val</span> <span class="py">jweObject</span> <span class="p">=</span> <span class="nc">JWEObject</span><span class="p">(</span><span class="n">jweHeader</span><span class="p">,</span> <span class="nc">Payload</span><span class="p">(</span><span class="n">signedJWT</span><span class="p">))</span>
+    <span class="c1">// Encrypt with the recipient's public key</span>
+    <span class="n">jweObject</span><span class="p">.</span><span class="nf">encrypt</span><span class="p">(</span><span class="n">encrypter</span><span class="p">)</span>
+    <span class="n">jweObject</span><span class="p">.</span><span class="nf">serialize</span><span class="p">()</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="c1">// Create a signed JWT</span>
+    <span class="n">signedJWT</span><span class="p">.</span><span class="nf">serialize</span><span class="p">()</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Unblu will accept the JWT to start a session until the expiration time is in the past.
+The session can go on much longer than the JWT expiration.
+In production environments, we recommend a JWT expiration of 60 seconds.</p>
+<div class="paragraph">
+<p>The RSA key pair used to sign the JWT can be static, or an ephemeral key rotated on a regular basis.
+Unblu just needs to be able to load a key using JSON Web Key (JWK) at all times.
+If you use rotating keys, you should therefore include some grace period during which you serve both the old and the new key in the same JWK key set.</p>
+</div>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="title">Generate RSA key pair to sign JWTs</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="kotlin"><span class="k">private</span> <span class="kd">val</span> <span class="py">key</span><span class="p">:</span> <span class="nc">RSAKey</span> <span class="p">=</span> <span class="nc">RSAKeyGenerator</span><span class="p">(</span><span class="mi">2048</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">keyUse</span><span class="p">(</span><span class="nc">KeyUse</span><span class="p">.</span><span class="nc">SIGNATURE</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">keyID</span><span class="p">(</span><span class="nc">UUID</span><span class="p">.</span><span class="nf">randomUUID</span><span class="p">().</span><span class="nf">toString</span><span class="p">())</span>
+    <span class="p">.</span><span class="nf">generate</span><span class="p">()</span>
+<span class="k">private</span> <span class="kd">val</span> <span class="py">signer</span> <span class="p">=</span> <span class="nc">RSASSASigner</span><span class="p">(</span><span class="n">key</span><span class="p">.</span><span class="nf">toRSAPrivateKey</span><span class="p">())</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Expose the public key in a JWK set in a Spring Boot application</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="kotlin"><span class="nd">@GetMapping</span><span class="p">(</span><span class="s">"jwk"</span><span class="p">)</span>
+<span class="k">fun</span> <span class="nf">keys</span><span class="p">():</span> <span class="nc">Map</span><span class="p">&lt;</span><span class="nc">String</span><span class="p">,</span> <span class="nc">Any</span><span class="p">&gt;</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nc">JWKSet</span><span class="p">(</span><span class="n">key</span><span class="p">.</span><span class="nf">toPublicJWK</span><span class="p">()).</span><span class="nf">toJSONObject</span><span class="p">()</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Example response of the JWK endpoint</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="json"><span class="p">{</span><span class="w">
+  </span><span class="nl">"keys"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"kty"</span><span class="p">:</span><span class="w"> </span><span class="s2">"RSA"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"e"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AQAB"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"use"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sig"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"kid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5d2acf7b-b5e3-4a08-8e71-0953f8cdf1f6"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"n"</span><span class="p">:</span><span class="w"> </span><span class="s2">"42"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_starting_an_unblu_authentication_session_using_a_jwt">Starting an Unblu authentication session using a JWT</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Unblu exposes an endpoint to check whether a user is currently authenticated.
+We recommend calling this endpoint before starting a new authentication.</p>
+</div>
+<div class="listingblock">
+<div class="title">Check whether a user has a valid session in Unblu</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="cm">/**
+  * Calls the authentication verification endpoint of Unblu.
+  *
+  * @returns {Promise&lt;boolean&gt;} Whether the user is authenticated
+  */</span>
+<span class="k">async</span> <span class="nx">checkAuthentication</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">options</span> <span class="o">=</span> <span class="p">{</span> <span class="na">credentials</span><span class="p">:</span> <span class="dl">'</span><span class="s1">include</span><span class="dl">'</span> <span class="p">};</span> // <b class="conum">(1)</b>
+  <span class="k">return</span> <span class="k">await</span> <span class="nx">fetch</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">unbluBaseUrl</span> <span class="o">+</span> <span class="dl">'</span><span class="s1">/rest/v3/authenticator/isAuthenticated</span><span class="dl">'</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">response</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">const</span> <span class="nx">message</span> <span class="o">=</span> <span class="s2">`An error has occurred: </span><span class="p">${</span><span class="nx">response</span><span class="p">.</span><span class="nx">status</span><span class="p">}</span><span class="s2">`</span><span class="p">;</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="k">return</span> <span class="nx">response</span><span class="p">;</span>
+    <span class="p">})</span>
+    <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">response</span> <span class="o">=&gt;</span> <span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">());</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>All browsers block third-party cookies unless you set <code>credentials: 'include'</code> (<a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">fetch</a>) or <code>withCredentials = true</code> (<a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest">XMLHttpRequest</a>)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>If <code>checkAuthentication()</code> returns <code>false</code>, you can start the authentication process.
+After obtaining the signed JWT from the application, the JWT must be sent to Unblu in a POST request to the endpoint <code>unblu/rest/authenticator/loginWithSecureToken</code>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Call <code>loginWithSecureToken</code> from the visitor&#8217;s browser</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="cm">/**
+  * Starts an Unblu authentication session using a JWT.
+  * @returns {Promise}, fulfilled when login succeeded, rejected when login failed.
+  */</span>
+<span class="nx">activateUnbluJwt</span> <span class="p">(</span><span class="nx">jwt</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">request</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">method</span><span class="p">:</span> <span class="dl">'</span><span class="s1">POST</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">headers</span><span class="p">:</span> <span class="p">{</span>
+      <span class="dl">'</span><span class="s1">Content-Type</span><span class="dl">'</span><span class="p">:</span> <span class="dl">'</span><span class="s1">application/json;charset=UTF-8</span><span class="dl">'</span>
+    <span class="p">},</span>
+    <span class="na">body</span><span class="p">:</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span> <span class="na">token</span><span class="p">:</span> <span class="nx">jwt</span><span class="p">,</span> <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">JWT</span><span class="dl">'</span> <span class="p">}),</span>
+    <span class="na">credentials</span><span class="p">:</span> <span class="dl">'</span><span class="s1">include</span><span class="dl">'</span>
+  <span class="p">};</span>
+  <span class="kd">const</span> <span class="nx">loginUrl</span> <span class="o">=</span> <span class="s2">`</span><span class="p">${</span><span class="k">this</span><span class="p">.</span><span class="nx">unbluBaseUrl</span><span class="p">}</span><span class="s2">/rest/v3/authenticator/loginWithSecureToken?x-unblu-apikey=</span><span class="p">${</span><span class="k">this</span><span class="p">.</span><span class="nx">unbluApiKey</span><span class="p">}</span><span class="s2">`</span><span class="p">;</span>
+  <span class="k">return</span> <span class="nx">fetch</span><span class="p">(</span><span class="nx">loginUrl</span><span class="p">,</span> <span class="nx">request</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">response</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Unblu session activated</span><span class="dl">'</span><span class="p">);</span>
+      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="dl">'</span><span class="s1">Failed to activate token!</span><span class="dl">'</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">});</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The response to <code>loginWithSecureToken</code> includes a <code>Set-Cookie</code> header.</p>
+</div>
+<div class="listingblock">
+<div class="title">Example authentication cookie</div>
+<div class="content">
+<pre class="rouge highlight"><code>Set-Cookie: x-unblu-authsession="4c2sGUuN-6GM8pL9-szYsb8_AQlEM49nJDY~";Path=/unblu;Expires=Wed, 09 Jun 2021 14:41:12 GMT;SameSite=None;Secure;HttpOnly</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The Unblu backend and the host application must run on the same second-level domain (e.g. company.com).
+Otherwise, some browsers (i.e. Safari and future version of Chrome) will treat the Unblu authentication cookie as a third-party cookie and therefore block it.
+To circumvent this issue, create a subdomain such as chat.example.com that points to our cloud IP address.
+Your website should then use this subdomain to call Unblu.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ending_an_unblu_session">Ending an Unblu session</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Depending on your risk assessment, you may want to end the Unblu session when the application performs a logout.</p>
+</div>
+<div class="listingblock">
+<div class="title">Call <code>logout</code> from the visitor&#8217;s browser</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="javascript"><span class="cm">/**
+  * Calls the Unblu logout endpoint.
+  * @returns {Promise}, fulfilled when logout succeeded, rejected when logout failed.
+  */</span>
+<span class="nx">logout</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">request</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">method</span><span class="p">:</span> <span class="dl">'</span><span class="s1">POST</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">headers</span><span class="p">:</span> <span class="p">{</span>
+      <span class="dl">'</span><span class="s1">Content-Type</span><span class="dl">'</span><span class="p">:</span> <span class="dl">'</span><span class="s1">application/json;charset=UTF-8</span><span class="dl">'</span>
+    <span class="p">},</span>
+    <span class="na">body</span><span class="p">:</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span> <span class="na">redirectOnSuccess</span><span class="p">:</span> <span class="kc">null</span> <span class="p">}),</span>
+    <span class="na">credentials</span><span class="p">:</span> <span class="dl">'</span><span class="s1">include</span><span class="dl">'</span>
+  <span class="p">};</span>
+  <span class="kd">const</span> <span class="nx">logoutUrl</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">unbluBaseUrl</span> <span class="o">+</span> <span class="dl">'</span><span class="s1">/rest/v3/authenticator/logout</span><span class="dl">'</span><span class="p">;</span>
+  <span class="k">return</span> <span class="nx">fetch</span><span class="p">(</span><span class="nx">logoutUrl</span><span class="p">,</span> <span class="nx">request</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">response</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Unblu logout successful</span><span class="dl">'</span><span class="p">);</span>
+        <span class="nx">location</span><span class="p">.</span><span class="nx">reload</span><span class="p">();</span>
+      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Logout failed</span><span class="dl">'</span><span class="p">,</span> <span class="nx">response</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">});</span>
+<span class="p">}</span></code></pre>
 </div>
 </div>
 </div>
@@ -802,7 +1093,7 @@ IIQdfNOVVaTOS+OHMuwNraA=
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-04-15 13:19:50 UTC
+Last updated 2021-06-07 13:50:50 UTC
 </div>
 </div>
 </body>
