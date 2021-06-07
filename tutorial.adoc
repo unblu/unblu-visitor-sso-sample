@@ -1,4 +1,4 @@
-= Unblu visitor single sign-On (SSO)
+= Unblu visitor single sign-on (SSO)
 :source-highlighter: rouge
 :toc:
 :imagesdir: images
@@ -102,7 +102,7 @@ The application needs to create a JWT signed with an RSA key pair and make it ac
 
 The JWT must be signed with a key pair referenced by its Key ID (`kid`).
 It must include the user attributes as claims.
-The claims must be named as configured in the http://docs.unblu.com/en/docs/latest/reference/configuration-properties.html#com-unblu-platform-server-core-auth-configuration-claimmappingconfiguration[`claimMapping`^] in the Unblu configuration.
+The claims must be named as configured in the https://www.unblu.com/en/docs/latest/reference/configuration-properties.html#com-unblu-platform-server-core-auth-configuration-claimmappingconfiguration[`claimMapping`^] in the Unblu configuration.
 
 .Decoded sample JWT
 [source]
@@ -137,7 +137,7 @@ NOTE: You can check a JWT with a service such as https://jwt.io/[jwt.io].
 include::src/main/kotlin/com/unblu/demo/sample/jwt/ApiController.kt[tag=jwt]
 ----
 <1> Unblu will accept the JWT to start a session until the expiration time is in the past.
-The session can go on be much longer than the JWT expiration.
+The session can go on much longer than the JWT expiration.
 In production environments, we recommend a JWT expiration of 60 seconds.
 +
 The RSA key pair used to sign the JWT can be static, or an ephemeral key rotated on a regular basis.

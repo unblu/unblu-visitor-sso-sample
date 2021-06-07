@@ -1,4 +1,4 @@
-= Unblu Visitor Single Sign-On (SSO)
+= Unblu visitor single sign-on (SSO)
 :source-highlighter: rouge
 
 Be sure to review our https://unblu.github.io/unblu-visitor-sso-sample/[visitor SSO implementation tutorial] as well.
