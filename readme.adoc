@@ -38,7 +38,7 @@ curl -X POST \
 == Configuration
 
 The sample application's configuration property `unblu.serverUrl` must point to a running Unblu installation.
-ID propagation based on JWT must be enabled on the Unblu server.
+JWT based visitor SSO must be enabled on the Unblu server.
 
 .Change `src/main/resources/application.properties` to reconfigure the sample application
 [source,ini]
