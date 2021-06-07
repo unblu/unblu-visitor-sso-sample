@@ -96,11 +96,11 @@ openssl rsa -pubout -in unblu.pem -out unblu_public.pem
 
 == Generating a JWT
 
-The code samples that follow are part of a sample implementation of visitor SSO and may be freely copied.
+The code samples that follow are part of a https://github.com/unblu/unblu-visitor-sso-sample[sample implementation] of visitor SSO and may be freely copied.
 
 The application needs to create a JWT signed with an RSA key pair and make it accessible from the browser JavaScript after the user authenticated with his application specific credentials.
 
-The JWT must be signed with a key pair referenced by its Key ID (`kid`). 
+The JWT must be signed with a key pair referenced by its Key ID (`kid`).
 It must include the user attributes as claims.
 The claims must be named as configured in the http://docs.unblu.com/en/docs/latest/reference/configuration-properties.html#com-unblu-platform-server-core-auth-configuration-claimmappingconfiguration[`claimMapping`^] in the Unblu configuration.
 
@@ -216,3 +216,4 @@ Depending on your risk assessment, you may want to end the Unblu session when th
 ----
 include::src/main/resources/static/application.js[tag=logout]
 ----
+
