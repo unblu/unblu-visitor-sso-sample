@@ -13,7 +13,7 @@ jobs:
       - name: Install and Build 🔧
         run: |
           sudo gem install asciidoctor rouge
-          asciidoctor -o docs/index.html documentation.adoc
+          asciidoctor -o docs/index.html tutorial.adoc
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@4.1.1

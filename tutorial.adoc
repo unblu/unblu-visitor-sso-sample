@@ -1,0 +1,219 @@
+= Unblu visitor single sign-on (SSO)
+:source-highlighter: rouge
+:toc:
+:imagesdir: images
+
+This tutorial is intended as a guide for developers implementing Unblu's visitor SSO using JSON Web Tokens (JWT) in an application.
+
+Adding visitor SSO to your application has a number of benefits:
+
+* Agents know who they are speaking to.
+* Visitors can view their old conversations from different devices.
+* Different people using the same device each has their own conversation history.
+
+Before you continue, you may want to review the general introduction to Unblu Cloud SSO in our official https://www.unblu.com/en/docs/latest/knowledge-base/cloud-sso.html[documentation].
+
+NOTE: Logging in to Unblu using a JWT was introduced in Unblu 6.13.0.
+
+== Data flow
+
+The diagram below illustrates the order in which data flows between a visitor, your application, and the Unblu server during visitor SSO.
+
+image::Unblu Visitor SSO.svg[The data flow of visitor SSO in Unblu,Embedded,opts=inline]
+
+. The visitor is authenticated using your application's standard authentication mechanism.
+. The application creates a JWT and signs it with a private key.
+. The application sends the JWT to the visitor's browser.
+. The visitor's browser sends the JWT to Unblu (`POST /unblu/rest/v3/authenticator/loginWithSecureToken`)
+. Unblu loads the public key used to sign the JWT from the application.
+Unblu will cache the keys and therefore not request it for every validation.
+. Unblu validates the JWT signature and attributes (`iss`, `aud`, `exp`).
+. Unblu sets a session cookie in the visitor's browser.
+
+IMPORTANT: The Unblu backend and the host application must be running in the same second-level domain (e.g. `example.com`).
+If they don't, some browsers -- Safari, for example -- will treat the Unblu authentication cookie as a third-party cookie and block it.
+
+== Configuring Unblu for visitor SS0
+
+By default, visitor SSO is disabled.
+Use the configuration below to activate it.
+
+.Visitor SSO Configuration in Unblu
+[source,ini]
+----
+# Ensure that /unblu (visitor) and /co-unblu (agent) are separated
+# and authentication cookies are set on the correct path
+com.unblu.identifier.publicPathPrefix=${systemIdentifier}
+com.unblu.identifier.restrictedPathPrefix=co-${systemIdentifier}
+
+# Visitor SSO is typically used in a cross-site setup, so we disable 
+# site-embedded mode
+com.unblu.identifier.siteEmbeddedSetup=false
+
+com.unblu.authentication.untrusted.sources=LOCAL
+
+com.unblu.authentication.jwt.jwkUrl=https://application.example.com/api/jwk
+com.unblu.authentication.jwt.expectedIssuer=https://application.example.com
+com.unblu.authentication.jwt.expectedAudience=https://example.unblu.cloud
+com.unblu.authentication.jwt.useEncryption=false
+#com.unblu.authentication.jwt.encryptionKey=<private key, if encryption is enabled>
+
+# Enable authenticator/loginWithSecureToken
+com.unblu.authentication.tokenSignup.enabled=true
+com.unblu.authentication.tokenSignup.claimMapping.username=username
+com.unblu.authentication.tokenSignup.claimMapping.email=email
+com.unblu.authentication.tokenSignup.claimMapping.firstName=firstName
+com.unblu.authentication.tokenSignup.claimMapping.lastName=lastName
+
+# To use cross-site cookies, most browsers require that you use HTTPS.
+# Enable the configuration properties below if you run the application without 
+# a reverse proxy providing HTTPS connections.
+#com.unblu.identifier.cookieSecureFlag=true
+#com.unblu.runtime.jetty.securehttpenabled=true
+#com.unblu.runtime.jetty.keystorepath=tls.p12
+#com.unblu.runtime.jetty.keystorepassword=password
+----
+
+The URL configured in the `jwkUrl` property must be accessible from the Unblu server.
+`expectedIssuer` and `expectedAudience` must match the `iss` and `aud` claims as set by the application.
+
+== Generating an RSA key pair to encrypt the JWT
+
+You can encrypt the JWT.
+This will hide the content of the JWT payload from the visitor if they intercept the request in their browser.
+
+To use JWT encryption, generate an RSA key pair.
+Encryption uses a separate key pair, and the application uses Unblu's public key to encrypt the JWT after signing it with its own private key.
+
+The snippet belows shows how to generate an RSA key pair using `openssl`.
+
+.Generate RSA key pair
+[source,bash]
+----
+openssl genpkey -algorithm RSA -out unblu.pem -pkeyopt rsa_keygen_bits:2048
+openssl rsa -pubout -in unblu.pem -out unblu_public.pem
+----
+
+== Generating a JWT
+
+The code samples that follow are part of a https://github.com/unblu/unblu-visitor-sso-sample[sample implementation] of visitor SSO and may be freely copied.
+
+The application needs to create a JWT signed with an RSA key pair and make it accessible from the browser JavaScript after the user authenticated with his application specific credentials.
+
+The JWT must be signed with a key pair referenced by its Key ID (`kid`).
+It must include the user attributes as claims.
+The claims must be named as configured in the https://www.unblu.com/en/docs/latest/reference/configuration-properties.html#com-unblu-platform-server-core-auth-configuration-claimmappingconfiguration[`claimMapping`^] in the Unblu configuration.
+
+.Decoded sample JWT
+[source]
+----
+Token header
+------------
+{
+"typ": "JWT",
+"alg": "RS256",
+"kid": "5d2acf7b-b5e3-4a08-8e71-0953f8cdf1f6"
+}
+
+Token claims
+------------
+{
+"aud": "https://example.unblu.cloud",
+"email": "peter.muster@example.com",
+"exp": 1622640746,
+"firstName": "Peter",
+"iat": 1622637146,
+"iss": "https://application.example.com",
+"lastName": "Muster",
+"username": "pmuster"
+}
+----
+
+NOTE: You can check a JWT with a service such as https://jwt.io/[jwt.io].
+
+.Create a JWT in Kotlin using the https://connect2id.com/products/nimbus-jose-jwt[Nimbus] library
+[source,kotlin,indent=0]
+----
+include::src/main/kotlin/com/unblu/demo/sample/jwt/ApiController.kt[tag=jwt]
+----
+<1> Unblu will accept the JWT to start a session until the expiration time is in the past.
+The session can go on much longer than the JWT expiration.
+In production environments, we recommend a JWT expiration of 60 seconds.
++
+The RSA key pair used to sign the JWT can be static, or an ephemeral key rotated on a regular basis.
+Unblu just needs to be able to load a key using JSON Web Key (JWK) at all times.
+If you use rotating keys, you should therefore include some grace period during which you serve both the old and the new key in the same JWK key set.
+
+.Generate RSA key pair to sign JWTs
+[source,kotlin,indent=0]
+----
+include::src/main/kotlin/com/unblu/demo/sample/jwt/ApiController.kt[tag=key]
+----
+
+.Expose the public key in a JWK set in a Spring Boot application
+[source,kotlin,indent=0]
+----
+include::src/main/kotlin/com/unblu/demo/sample/jwt/ApiController.kt[tag=jwk]
+----
+
+.Example response of the JWK endpoint
+[source,json]
+----
+{
+  "keys": [
+    {
+      "kty": "RSA",
+      "e": "AQAB",
+      "use": "sig",
+      "kid": "5d2acf7b-b5e3-4a08-8e71-0953f8cdf1f6",
+      "n": "42"
+    }
+  ]
+}
+
+----
+
+== Starting an Unblu authentication session using a JWT
+
+Unblu exposes an endpoint to check whether a user is currently authenticated.
+We recommend calling this endpoint before starting a new authentication.
+
+.Check whether a user has a valid session in Unblu
+[source,javascript,indent=0]
+----
+include::src/main/resources/static/application.js[tag=checkAuthentication]
+----
+<1> All browsers block third-party cookies unless you set `credentials: 'include'` (https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API[fetch]) or `withCredentials = true` (https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest[XMLHttpRequest])
+
+If `checkAuthentication()` returns `false`, you can start the authentication process.
+After obtaining the signed JWT from the application, the JWT must be sent to Unblu in a POST request to the endpoint `unblu/rest/authenticator/loginWithSecureToken`.
+
+.Call `loginWithSecureToken` from the visitor's browser
+[source,javascript,indent=0]
+----
+include::src/main/resources/static/application.js[tag=activateUnbluJwt]
+----
+
+The response to `loginWithSecureToken` includes a `Set-Cookie` header.
+
+.Example authentication cookie
+[source]
+----
+Set-Cookie: x-unblu-authsession="4c2sGUuN-6GM8pL9-szYsb8_AQlEM49nJDY~";Path=/unblu;Expires=Wed, 09 Jun 2021 14:41:12 GMT;SameSite=None;Secure;HttpOnly
+----
+
+The Unblu backend and the host application must run on the same second-level domain (e.g. company.com).
+Otherwise, some browsers (i.e. Safari and future version of Chrome) will treat the Unblu authentication cookie as a third-party cookie and therefore block it.
+To circumvent this issue, create a subdomain such as chat.example.com that points to our cloud IP address.
+Your website should then use this subdomain to call Unblu.
+
+== Ending an Unblu session
+
+Depending on your risk assessment, you may want to end the Unblu session when the application performs a logout.
+
+.Call `logout` from the visitor's browser
+[source,javascript,indent=0]
+----
+include::src/main/resources/static/application.js[tag=logout]
+----
+

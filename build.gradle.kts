@@ -30,8 +30,16 @@ dependencies {
 	implementation("org.bouncycastle:bcprov-jdk15on:[1.61,)")
 	implementation("org.bouncycastle:bcpkix-jdk15on:[1.61,)")
 
+	// WebJars
+	implementation("org.webjars:webjars-locator-core:0.46")
+	implementation("org.webjars:bootstrap:5.0.1")
+
+	// Testing
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("io.projectreactor:reactor-test")
+
+	// Development
+	developmentOnly("org.springframework.boot:spring-boot-devtools")
 }
 
 tasks.withType<Test> {
