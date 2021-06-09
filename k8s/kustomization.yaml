@@ -5,7 +5,7 @@ resources:
 configMapGenerator:
   - name: sample-jwt-auth-config
     literals:
-      - UNBLU_BASEURL=https://unblu.example.com/unblu
+      - UNBLU_SERVERURL=https://example.unblu.cloud
 
 images:
   - name: unblu-visitor-sso-sample
