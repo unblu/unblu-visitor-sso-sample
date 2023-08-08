@@ -115,12 +115,12 @@ class SampleApp {
   }
   // end::activateUnbluJwt[]
 
-  // tag::logout[]
+  // tag::clientLogout[]
   /**
     * Calls the Unblu logout endpoint.
     * @returns {Promise}, fulfilled when logout succeeded, rejected when logout failed.
     */
-  logout () {
+  clientLogout () {
     const request = {
       method: 'POST',
       headers: {
@@ -140,5 +140,26 @@ class SampleApp {
         }
       });
   }
-  // end::logout[]
+  // end::clientLogout[]
+
+  // tag::serverLogout[]
+  /**
+   * Calls the application backend server logout endpoint
+   * @returns {Promise}, fulfilled when logout succeeded, rejected when logout failed.
+   */
+  serverLogout () {
+    const request = {
+      method: 'GET'
+    };
+    return fetch('/api/logout')
+      .then((response) => {
+        if (response.ok) {
+          console.log('Unblu logout successful');
+          location.reload();
+        } else {
+          console.log('Logout failed', response);
+        }
+      });
+  }
+  // end::serverLogout[]
 }

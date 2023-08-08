@@ -12,14 +12,19 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import org.springframework.core.io.Resource
 import org.springframework.web.bind.annotation.*
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.util.*
+import javax.servlet.http.HttpSession
 
 
 @RestController
 @RequestMapping("api")
 class ApiController(
     private val configuration: JwtConfiguration,
-    unbluConfiguration: UnbluConfiguration
+    private val unbluConfiguration: UnbluConfiguration
 ) {
     // tag::key[]
     private val key: RSAKey = RSAKeyGenerator(2048)
@@ -34,8 +39,11 @@ class ApiController(
 
 
     @PostMapping("token")
-    fun createJwt(@RequestBody userInfo: JwtRequest): TokenResponse {
+    fun createJwt(@RequestBody userInfo: JwtRequest, session: HttpSession): TokenResponse {
         // tag::jwt[]
+        val logoutToken: String = UUID.randomUUID().toString()
+        session.setAttribute("jwtLogoutToken", logoutToken)
+
         val header = JWSHeader.Builder(JWSAlgorithm.RS256)
             .type(JOSEObjectType.JWT)
             .keyID(key.keyID)
@@ -50,6 +58,7 @@ class ApiController(
             .claim("username", userInfo.username)
             .claim("firstName", userInfo.firstname)
             .claim("lastName", userInfo.lastname)
+            .claim("logoutToken", logoutToken)
             .build()
         val signedJWT = SignedJWT(header, payload)
 
@@ -71,6 +80,52 @@ class ApiController(
         // end::jwt[]
         return TokenResponse(jwt)
     }
+
+    // tag::logout[]
+    @GetMapping("logout")
+    fun logout(session: HttpSession) : String {
+        val logoutToken = session.getAttribute("jwtLogoutToken")
+        val header = JWSHeader.Builder(JWSAlgorithm.RS256)
+            .type(JOSEObjectType.JWT)
+            .keyID(key.keyID)
+            .build()
+        val expiration = Date(System.currentTimeMillis() + configuration.validFor.toMillis())
+        val payload = JWTClaimsSet.Builder()
+            .issuer(configuration.issuer)
+            .audience(configuration.audience)
+            .issueTime(Date())
+            .expirationTime(expiration) // <1>
+            .claim("logoutToken", logoutToken)
+            .build()
+        val signedJWT = SignedJWT(header, payload)
+
+        signedJWT.sign(signer)
+
+        val jwt: String = if (configuration.encryption) {
+            // Create JWE object with signed JWT as payload
+            val jweHeader = JWEHeader.Builder(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A256GCM)
+                .contentType("JWT")
+                .build()
+            val jweObject = JWEObject(jweHeader, Payload(signedJWT))
+            // Encrypt with the recipient's public key
+            jweObject.encrypt(encrypter)
+            jweObject.serialize()
+        } else {
+            // Create a signed JWT
+            signedJWT.serialize()
+        }
+
+        val targetURI = URI.create(unbluConfiguration.serverUrl + unbluConfiguration.entryPath + "/rest/v3/authenticator/logoutWithSecureToken?x-unblu-apikey=" + unbluConfiguration.apiKey)
+        val client = HttpClient.newBuilder().build()
+        val request = HttpRequest.newBuilder()
+            .uri(targetURI)
+            .POST(HttpRequest.BodyPublishers.ofString("{\n\"token\":\"$jwt\",\n\"type\":\"JWT\"\n}"))
+            .header("Content-Type", "application/json;charset=UTF-8")
+            .build()
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+        return response.body()
+    }
+    // end::logout[]
 
     // tag::jwk[]
     @GetMapping("jwk")

@@ -56,7 +56,8 @@
     </form>
 
     <form action="" id="sign-out-form" onsubmit="return false;">
-        <button class="btn btn-primary" id="logout">Logout</button>
+        <button class="btn btn-primary" id="client-logout">Client logout</button>
+        <button class="btn btn-primary" id="server-logout">Server logout</button>
     </form>
 
 </div>
@@ -75,8 +76,8 @@ window.onload = async function WindowLoad(event) {
     sampleApp.init();
 
     document.getElementById('login').addEventListener("click", sampleApp.login.bind(sampleApp));
-    document.getElementById('logout').addEventListener("click", sampleApp.logout.bind(sampleApp));
-
+    document.getElementById('client-logout').addEventListener("click", sampleApp.clientLogout.bind(sampleApp));
+    document.getElementById('server-logout').addEventListener("click", sampleApp.serverLogout.bind(sampleApp));
 }
 
 </script>
