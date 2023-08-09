@@ -12,12 +12,12 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import org.springframework.core.io.Resource
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.WebSession
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.util.*
-import javax.servlet.http.HttpSession
 
 
 @RestController
@@ -39,11 +39,8 @@ class ApiController(
 
 
     @PostMapping("token")
-    fun createJwt(@RequestBody userInfo: JwtRequest, session: HttpSession): TokenResponse {
+    fun createJwt(@RequestBody userInfo: JwtRequest, session: WebSession): TokenResponse {
         // tag::jwt[]
-        val logoutToken: String = UUID.randomUUID().toString()
-        session.setAttribute("jwtLogoutToken", logoutToken)
-
         val header = JWSHeader.Builder(JWSAlgorithm.RS256)
             .type(JOSEObjectType.JWT)
             .keyID(key.keyID)
@@ -58,7 +55,7 @@ class ApiController(
             .claim("username", userInfo.username)
             .claim("firstName", userInfo.firstname)
             .claim("lastName", userInfo.lastname)
-            .claim("logoutToken", logoutToken)
+            .claim("logoutToken", session.id)
             .build()
         val signedJWT = SignedJWT(header, payload)
 
@@ -78,13 +75,15 @@ class ApiController(
             signedJWT.serialize()
         }
         // end::jwt[]
+
+        session.start()
+
         return TokenResponse(jwt)
     }
 
     // tag::logout[]
     @GetMapping("logout")
-    fun logout(session: HttpSession) : String {
-        val logoutToken = session.getAttribute("jwtLogoutToken")
+    fun logout(session: WebSession) : String {
         val header = JWSHeader.Builder(JWSAlgorithm.RS256)
             .type(JOSEObjectType.JWT)
             .keyID(key.keyID)
@@ -95,7 +94,7 @@ class ApiController(
             .audience(configuration.audience)
             .issueTime(Date())
             .expirationTime(expiration) // <1>
-            .claim("logoutToken", logoutToken)
+            .claim("logoutToken", session.id)
             .build()
         val signedJWT = SignedJWT(header, payload)
 
@@ -123,6 +122,9 @@ class ApiController(
             .header("Content-Type", "application/json;charset=UTF-8")
             .build()
         val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+
+        session.invalidate()
+
         return response.body()
     }
     // end::logout[]
