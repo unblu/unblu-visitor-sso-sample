@@ -211,9 +211,14 @@ Your website should then use this subdomain to call Unblu.
 
 Depending on your risk assessment, you may want to end the Unblu session when the application performs a logout.
 
-.Call `logout` from the visitor's browser
+.Call `clientLogout` from the visitor's browser
 [source,javascript,indent=0]
 ----
-include::src/main/resources/static/application.js[tag=logout]
+include::src/main/resources/static/application.js[tag=clientLogout]
 ----
 
+.Execute `logout` from the Spring Boot application
+[source,kotlin,indent=0]
+----
+include::src/main/kotlin/com/unblu/demo/sample/jwt/ApiController.kt[tag=logout]
+----
