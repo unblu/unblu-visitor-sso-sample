@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping
 @Controller
 class MainController(private val unbluConfiguration: UnbluConfiguration) {
 
-    @GetMapping("index")
+    @GetMapping
     fun index(model: Model): String {
         model["unbluServerUrl"] = unbluConfiguration.serverUrl
         model["unbluEntryPath"] = unbluConfiguration.entryPath
