@@ -217,7 +217,7 @@ Depending on your risk assessment, you may want to end the Unblu session when th
 include::src/main/resources/static/application.js[tag=clientLogout]
 ----
 
-.Execute `logout` from the Spring Boot application
+.Execute `logout` from the application backend (server-to-server API call)
 [source,kotlin,indent=0]
 ----
 include::src/main/kotlin/com/unblu/demo/sample/jwt/ApiController.kt[tag=logout]
