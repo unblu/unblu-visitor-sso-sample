@@ -43,15 +43,14 @@ class SampleApp {
     */
   async checkAuthentication () {
     const options = { credentials: 'include' }; // <1>
-    return await fetch(this.unbluBaseUrl + '/rest/v4/authenticator/isAuthenticated', options)
-      .then(response => {
-        if (!response.ok) {
-          const message = `An error has occurred: ${response.status}`;
-          throw new Error(message);
-        }
-        return response;
-      })
-      .then(response => response.json());
+    const response = await fetch(this.unbluBaseUrl + '/rest/v4/authenticator/getCurrentPerson', options);
+
+    if (!response.ok) {
+      const message = `An error has occurred: ${response.status}`;
+      throw new Error(message);
+    }
+
+    return response.json().authorizationRole === 'WEBUSER';
   }
   // end::checkAuthentication[]
 

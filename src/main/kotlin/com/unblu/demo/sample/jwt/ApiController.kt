@@ -114,7 +114,7 @@ class ApiController(
             signedJWT.serialize()
         }
 
-        val targetURI = URI.create(unbluConfiguration.serverUrl + unbluConfiguration.entryPath + "/rest/v3/authenticator/logoutWithSecureToken?x-unblu-apikey=" + unbluConfiguration.apiKey)
+        val targetURI = URI.create(unbluConfiguration.serverUrl + unbluConfiguration.entryPath + "/rest/v4/authenticator/logoutWithSecureToken?x-unblu-apikey=" + unbluConfiguration.apiKey)
         val client = HttpClient.newBuilder().build()
         val request = HttpRequest.newBuilder()
             .uri(targetURI)
