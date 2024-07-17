@@ -43,7 +43,7 @@ class SampleApp {
     */
   async checkAuthentication () {
     const options = { credentials: 'include' }; // <1>
-    return await fetch(this.unbluBaseUrl + '/rest/v3/authenticator/isAuthenticated', options)
+    return await fetch(this.unbluBaseUrl + '/rest/v4/authenticator/isAuthenticated', options)
       .then(response => {
         if (!response.ok) {
           const message = `An error has occurred: ${response.status}`;
@@ -103,7 +103,7 @@ class SampleApp {
       body: JSON.stringify({ token: jwt, type: 'JWT' }),
       credentials: 'include'
     };
-    const loginUrl = `${this.unbluBaseUrl}/rest/v3/authenticator/loginWithSecureToken?x-unblu-apikey=${this.unbluApiKey}`;
+    const loginUrl = `${this.unbluBaseUrl}/rest/v4/authenticator/loginWithSecureToken?x-unblu-apikey=${this.unbluApiKey}`;
     return fetch(loginUrl, request)
       .then((response) => {
         if (response.ok) {
@@ -129,7 +129,7 @@ class SampleApp {
       body: JSON.stringify({ redirectOnSuccess: null }),
       credentials: 'include'
     };
-    const logoutUrl = this.unbluBaseUrl + '/rest/v3/authenticator/logout';
+    const logoutUrl = this.unbluBaseUrl + '/rest/v4/authenticator/logout';
     return fetch(logoutUrl, request)
       .then((response) => {
         if (response.ok) {
