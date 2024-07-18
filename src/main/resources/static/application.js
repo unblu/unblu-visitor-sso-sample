@@ -50,7 +50,8 @@ class SampleApp {
       throw new Error(message);
     }
 
-    return response.json().authorizationRole === 'WEBUSER';
+    const data = await response.json();
+    return data.authorizationRole === 'WEBUSER';
   }
   // end::checkAuthentication[]
 
