@@ -629,7 +629,7 @@ Logging in to Unblu using a JWT was introduced in Unblu 6.13.0.
 <p>The application sends the JWT to the visitor&#8217;s browser.</p>
 </li>
 <li>
-<p>The visitor&#8217;s browser sends the JWT to Unblu (<code>POST /unblu/rest/v3/authenticator/loginWithSecureToken</code>)</p>
+<p>The visitor&#8217;s browser sends the JWT to Unblu (<code>POST /unblu/rest/v4/authenticator/loginWithSecureToken</code>)</p>
 </li>
 <li>
 <p>Unblu loads the public key used to sign the JWT from the application.
@@ -888,15 +888,14 @@ We recommend calling this endpoint before starting a new authentication.</p>
   */</span>
 <span class="k">async</span> <span class="nf">checkAuthentication </span><span class="p">()</span> <span class="p">{</span>
   <span class="kd">const</span> <span class="nx">options</span> <span class="o">=</span> <span class="p">{</span> <span class="na">credentials</span><span class="p">:</span> <span class="dl">'</span><span class="s1">include</span><span class="dl">'</span> <span class="p">};</span> // <b class="conum">(1)</b>
-  <span class="k">return</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">unbluBaseUrl</span> <span class="o">+</span> <span class="dl">'</span><span class="s1">/rest/v3/authenticator/isAuthenticated</span><span class="dl">'</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span>
-    <span class="p">.</span><span class="nf">then</span><span class="p">(</span><span class="nx">response</span> <span class="o">=&gt;</span> <span class="p">{</span>
-      <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kd">const</span> <span class="nx">message</span> <span class="o">=</span> <span class="s2">`An error has occurred: </span><span class="p">${</span><span class="nx">response</span><span class="p">.</span><span class="nx">status</span><span class="p">}</span><span class="s2">`</span><span class="p">;</span>
-        <span class="k">throw</span> <span class="k">new</span> <span class="nc">Error</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
-      <span class="p">}</span>
-      <span class="k">return</span> <span class="nx">response</span><span class="p">;</span>
-    <span class="p">})</span>
-    <span class="p">.</span><span class="nf">then</span><span class="p">(</span><span class="nx">response</span> <span class="o">=&gt;</span> <span class="nx">response</span><span class="p">.</span><span class="nf">json</span><span class="p">());</span>
+  <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">unbluBaseUrl</span> <span class="o">+</span> <span class="dl">'</span><span class="s1">/rest/v4/authenticator/getCurrentPerson</span><span class="dl">'</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
+
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">message</span> <span class="o">=</span> <span class="s2">`An error has occurred: </span><span class="p">${</span><span class="nx">response</span><span class="p">.</span><span class="nx">status</span><span class="p">}</span><span class="s2">`</span><span class="p">;</span>
+    <span class="k">throw</span> <span class="k">new</span> <span class="nc">Error</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nx">response</span><span class="p">.</span><span class="nf">json</span><span class="p">().</span><span class="nx">authorizationRole</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">WEBUSER</span><span class="dl">'</span><span class="p">;</span>
 <span class="p">}</span></code></pre>
 </div>
 </div>
@@ -927,7 +926,7 @@ After obtaining the signed JWT from the application, the JWT must be sent to Unb
     <span class="na">body</span><span class="p">:</span> <span class="nx">JSON</span><span class="p">.</span><span class="nf">stringify</span><span class="p">({</span> <span class="na">token</span><span class="p">:</span> <span class="nx">jwt</span><span class="p">,</span> <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">JWT</span><span class="dl">'</span> <span class="p">}),</span>
     <span class="na">credentials</span><span class="p">:</span> <span class="dl">'</span><span class="s1">include</span><span class="dl">'</span>
   <span class="p">};</span>
-  <span class="kd">const</span> <span class="nx">loginUrl</span> <span class="o">=</span> <span class="s2">`</span><span class="p">${</span><span class="k">this</span><span class="p">.</span><span class="nx">unbluBaseUrl</span><span class="p">}</span><span class="s2">/rest/v3/authenticator/loginWithSecureToken?x-unblu-apikey=</span><span class="p">${</span><span class="k">this</span><span class="p">.</span><span class="nx">unbluApiKey</span><span class="p">}</span><span class="s2">`</span><span class="p">;</span>
+  <span class="kd">const</span> <span class="nx">loginUrl</span> <span class="o">=</span> <span class="s2">`</span><span class="p">${</span><span class="k">this</span><span class="p">.</span><span class="nx">unbluBaseUrl</span><span class="p">}</span><span class="s2">/rest/v4/authenticator/loginWithSecureToken?x-unblu-apikey=</span><span class="p">${</span><span class="k">this</span><span class="p">.</span><span class="nx">unbluApiKey</span><span class="p">}</span><span class="s2">`</span><span class="p">;</span>
   <span class="k">return</span> <span class="nf">fetch</span><span class="p">(</span><span class="nx">loginUrl</span><span class="p">,</span> <span class="nx">request</span><span class="p">)</span>
     <span class="p">.</span><span class="nf">then</span><span class="p">((</span><span class="nx">response</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
       <span class="k">if </span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span> <span class="p">{</span>
@@ -978,7 +977,7 @@ Your website should then use this subdomain to call Unblu.</p>
     <span class="na">body</span><span class="p">:</span> <span class="nx">JSON</span><span class="p">.</span><span class="nf">stringify</span><span class="p">({</span> <span class="na">redirectOnSuccess</span><span class="p">:</span> <span class="kc">null</span> <span class="p">}),</span>
     <span class="na">credentials</span><span class="p">:</span> <span class="dl">'</span><span class="s1">include</span><span class="dl">'</span>
   <span class="p">};</span>
-  <span class="kd">const</span> <span class="nx">logoutUrl</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">unbluBaseUrl</span> <span class="o">+</span> <span class="dl">'</span><span class="s1">/rest/v3/authenticator/logout</span><span class="dl">'</span><span class="p">;</span>
+  <span class="kd">const</span> <span class="nx">logoutUrl</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">unbluBaseUrl</span> <span class="o">+</span> <span class="dl">'</span><span class="s1">/rest/v4/authenticator/logout</span><span class="dl">'</span><span class="p">;</span>
   <span class="k">return</span> <span class="nf">fetch</span><span class="p">(</span><span class="nx">logoutUrl</span><span class="p">,</span> <span class="nx">request</span><span class="p">)</span>
     <span class="p">.</span><span class="nf">then</span><span class="p">((</span><span class="nx">response</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
       <span class="k">if </span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span> <span class="p">{</span>
@@ -1026,7 +1025,7 @@ Your website should then use this subdomain to call Unblu.</p>
         <span class="n">signedJWT</span><span class="p">.</span><span class="nf">serialize</span><span class="p">()</span>
     <span class="p">}</span>
 
-    <span class="kd">val</span> <span class="py">targetURI</span> <span class="p">=</span> <span class="nc">URI</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="n">unbluConfiguration</span><span class="p">.</span><span class="n">serverUrl</span> <span class="p">+</span> <span class="n">unbluConfiguration</span><span class="p">.</span><span class="n">entryPath</span> <span class="p">+</span> <span class="s">"/rest/v3/authenticator/logoutWithSecureToken?x-unblu-apikey="</span> <span class="p">+</span> <span class="n">unbluConfiguration</span><span class="p">.</span><span class="n">apiKey</span><span class="p">)</span>
+    <span class="kd">val</span> <span class="py">targetURI</span> <span class="p">=</span> <span class="nc">URI</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="n">unbluConfiguration</span><span class="p">.</span><span class="n">serverUrl</span> <span class="p">+</span> <span class="n">unbluConfiguration</span><span class="p">.</span><span class="n">entryPath</span> <span class="p">+</span> <span class="s">"/rest/v4/authenticator/logoutWithSecureToken?x-unblu-apikey="</span> <span class="p">+</span> <span class="n">unbluConfiguration</span><span class="p">.</span><span class="n">apiKey</span><span class="p">)</span>
     <span class="kd">val</span> <span class="py">client</span> <span class="p">=</span> <span class="nc">HttpClient</span><span class="p">.</span><span class="nf">newBuilder</span><span class="p">().</span><span class="nf">build</span><span class="p">()</span>
     <span class="kd">val</span> <span class="py">request</span> <span class="p">=</span> <span class="nc">HttpRequest</span><span class="p">.</span><span class="nf">newBuilder</span><span class="p">()</span>
         <span class="p">.</span><span class="nf">uri</span><span class="p">(</span><span class="n">targetURI</span><span class="p">)</span>
@@ -1046,7 +1045,7 @@ Your website should then use this subdomain to call Unblu.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-18 06:32:05 UTC
+Last updated 2024-07-18 06:32:16 UTC
 </div>
 </div>
 </body>
