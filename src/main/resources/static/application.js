@@ -22,7 +22,7 @@ class SampleApp {
       signInForm.style.display = 'none';
       signOutForm.style.display = 'block';
       // Initialize Unblu
-      const unbluAPI = window.unblu.api.configure({
+      const unbluAPI = window.unblu.floating.api.configure({
         serverUrl: this.unbluServerUrl,
         entryPath: this.unbluEntryPath,
         apiKey: this.unbluApiKey,
