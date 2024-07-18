@@ -895,7 +895,8 @@ We recommend calling this endpoint before starting a new authentication.</p>
     <span class="k">throw</span> <span class="k">new</span> <span class="nc">Error</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
   <span class="p">}</span>
 
-  <span class="k">return</span> <span class="nx">response</span><span class="p">.</span><span class="nf">json</span><span class="p">().</span><span class="nx">authorizationRole</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">WEBUSER</span><span class="dl">'</span><span class="p">;</span>
+  <span class="kd">const</span> <span class="nx">data</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">response</span><span class="p">.</span><span class="nf">json</span><span class="p">();</span>
+  <span class="k">return</span> <span class="nx">data</span><span class="p">.</span><span class="nx">authorizationRole</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">WEBUSER</span><span class="dl">'</span><span class="p">;</span>
 <span class="p">}</span></code></pre>
 </div>
 </div>
@@ -1045,7 +1046,7 @@ Your website should then use this subdomain to call Unblu.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-18 06:32:16 UTC
+Last updated 2024-07-18 10:24:21 UTC
 </div>
 </div>
 </body>
