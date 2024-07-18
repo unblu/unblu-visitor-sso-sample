@@ -24,7 +24,7 @@ image::Unblu Visitor SSO.svg[The data flow of visitor SSO in Unblu,Embedded,opts
 . The visitor is authenticated using your application's standard authentication mechanism.
 . The application creates a JWT and signs it with a private key.
 . The application sends the JWT to the visitor's browser.
-. The visitor's browser sends the JWT to Unblu (`POST /unblu/rest/v3/authenticator/loginWithSecureToken`)
+. The visitor's browser sends the JWT to Unblu (`POST /unblu/rest/v4/authenticator/loginWithSecureToken`)
 . Unblu loads the public key used to sign the JWT from the application.
 Unblu will cache the keys and therefore not request it for every validation.
 . Unblu validates the JWT signature and attributes (`iss`, `aud`, `exp`).
