@@ -1,6 +1,7 @@
 package com.unblu.demo.sample.jwt
 
 import com.nimbusds.jose.*
+import com.nimbusds.jose.crypto.AESEncrypter
 import com.nimbusds.jose.crypto.RSAEncrypter
 import com.nimbusds.jose.crypto.RSASSASigner
 import com.nimbusds.jose.jwk.JWK
@@ -23,8 +24,8 @@ import java.util.*
 @RestController
 @RequestMapping("api")
 class ApiController(
-    private val configuration: JwtConfiguration,
-    private val unbluConfiguration: UnbluConfiguration
+    private val jwtConfig: JwtConfiguration,
+    private val unbluConfig: UnbluConfiguration
 ) {
     // tag::key[]
     private val key: RSAKey = RSAKeyGenerator(2048)
@@ -34,8 +35,7 @@ class ApiController(
     private val signer = RSASSASigner(key.toRSAPrivateKey())
     // end::key[]
 
-    private val unbluPublicKey: RSAKey = readKey(unbluConfiguration.publicKey)
-    private val encrypter: JWEEncrypter = RSAEncrypter(unbluPublicKey)
+    private val encrypter: JWEEncrypter = getEncrypter()
 
 
     @PostMapping("token")
@@ -45,10 +45,10 @@ class ApiController(
             .type(JOSEObjectType.JWT)
             .keyID(key.keyID)
             .build()
-        val expiration = Date(System.currentTimeMillis() + configuration.validFor.toMillis())
+        val expiration = Date(System.currentTimeMillis() + jwtConfig.validFor.toMillis())
         val payload = JWTClaimsSet.Builder()
-            .issuer(configuration.issuer)
-            .audience(configuration.audience)
+            .issuer(jwtConfig.issuer)
+            .audience(jwtConfig.audience)
             .issueTime(Date())
             .expirationTime(expiration) // <1>
             .claim("email", userInfo.email)
@@ -61,19 +61,7 @@ class ApiController(
 
         signedJWT.sign(signer)
 
-        val jwt: String = if (configuration.encryption) {
-            // Create JWE object with signed JWT as payload
-            val jweHeader = JWEHeader.Builder(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A256GCM)
-                .contentType("JWT")
-                .build()
-            val jweObject = JWEObject(jweHeader, Payload(signedJWT))
-            // Encrypt with the recipient's public key
-            jweObject.encrypt(encrypter)
-            jweObject.serialize()
-        } else {
-            // Create a signed JWT
-            signedJWT.serialize()
-        }
+        val jwt: String = createJwt(signedJWT)
         // end::jwt[]
 
         session.start()
@@ -83,15 +71,15 @@ class ApiController(
 
     // tag::logout[]
     @GetMapping("logout")
-    fun logout(session: WebSession) : String {
+    fun logout(session: WebSession): String {
         val header = JWSHeader.Builder(JWSAlgorithm.RS256)
             .type(JOSEObjectType.JWT)
             .keyID(key.keyID)
             .build()
-        val expiration = Date(System.currentTimeMillis() + configuration.validFor.toMillis())
+        val expiration = Date(System.currentTimeMillis() + jwtConfig.validFor.toMillis())
         val payload = JWTClaimsSet.Builder()
-            .issuer(configuration.issuer)
-            .audience(configuration.audience)
+            .issuer(jwtConfig.issuer)
+            .audience(jwtConfig.audience)
             .issueTime(Date())
             .expirationTime(expiration) // <1>
             .claim("logoutToken", session.id)
@@ -99,22 +87,10 @@ class ApiController(
         val signedJWT = SignedJWT(header, payload)
 
         signedJWT.sign(signer)
+        val jwt: String = createJwt(signedJWT)
 
-        val jwt: String = if (configuration.encryption) {
-            // Create JWE object with signed JWT as payload
-            val jweHeader = JWEHeader.Builder(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A256GCM)
-                .contentType("JWT")
-                .build()
-            val jweObject = JWEObject(jweHeader, Payload(signedJWT))
-            // Encrypt with the recipient's public key
-            jweObject.encrypt(encrypter)
-            jweObject.serialize()
-        } else {
-            // Create a signed JWT
-            signedJWT.serialize()
-        }
-
-        val targetURI = URI.create(unbluConfiguration.serverUrl + unbluConfiguration.entryPath + "/rest/v4/authenticator/logoutWithSecureToken?x-unblu-apikey=" + unbluConfiguration.apiKey)
+        val targetURI =
+            URI.create(unbluConfig.serverUrl + unbluConfig.entryPath + "/rest/v3/authenticator/logoutWithSecureToken?x-unblu-apikey=" + unbluConfig.apiKey)
         val client = HttpClient.newBuilder().build()
         val request = HttpRequest.newBuilder()
             .uri(targetURI)
@@ -124,6 +100,7 @@ class ApiController(
         val response = client.send(request, HttpResponse.BodyHandlers.ofString())
 
         session.invalidate()
+            .subscribe()
 
         return response.body()
     }
@@ -136,8 +113,48 @@ class ApiController(
     }
     // end::jwk[]
 
+    private fun getEncrypter(): JWEEncrypter {
+        return when (jwtConfig.encryptionAlgorithm) {
+            JWTEncryptionAlgorithm.RSA -> {
+                val unbluPublicKey: RSAKey = readKey(unbluConfig.publicKey)
+                RSAEncrypter(unbluPublicKey)
+            }
+
+            JWTEncryptionAlgorithm.AES -> {
+                val encryptionKey = Base64.getDecoder().decode(unbluConfig.aesEncryptionKey)
+                AESEncrypter(encryptionKey)
+            }
+        }
+    }
+
     private fun readKey(key: Resource): RSAKey {
         val text = key.inputStream.bufferedReader().readText()
         return JWK.parseFromPEMEncodedObjects(text) as RSAKey
+    }
+
+    private fun createJwt(signedJWT: SignedJWT): String {
+        return when (jwtConfig.encryption) {
+            true -> encryptToken(signedJWT)
+            false -> signedJWT.serialize()
+        }
+    }
+
+    private fun encryptToken(signedJWT: SignedJWT): String {
+        // Create JWE object with signed JWT as payload
+        val algorithm: JWEAlgorithm = getEncryptionAlgorithm()
+        val jweHeader = JWEHeader.Builder(algorithm, EncryptionMethod.A256GCM)
+            .contentType("JWT")
+            .build()
+        val jweObject = JWEObject(jweHeader, Payload(signedJWT))
+        // Encrypt with the recipient's public key
+        jweObject.encrypt(encrypter)
+        return jweObject.serialize()
+    }
+
+    private fun getEncryptionAlgorithm(): JWEAlgorithm {
+        return when (jwtConfig.encryptionAlgorithm) {
+            JWTEncryptionAlgorithm.RSA -> JWEAlgorithm.RSA_OAEP_256
+            JWTEncryptionAlgorithm.AES -> JWEAlgorithm.A256KW
+        }
     }
 }
