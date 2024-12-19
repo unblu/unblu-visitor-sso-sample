@@ -203,7 +203,7 @@ include::src/main/resources/static/application.js[tag=checkAuthentication]
 If `checkAuthentication()` returns `false`, you can start the authentication process.
 After obtaining the signed JWT from the application, the JWT must be sent to Unblu in a POST request to the endpoint `unblu/rest/authenticator/loginWithSecureToken`.
 
-.Call `loginWithSecureToken` from the https://xxx[visitor]'s browser
+.Call `loginWithSecureToken` from the visitor's browser
 [source,javascript,indent=0]
 ----
 include::src/main/resources/static/application.js[tag=activateUnbluJwt]
