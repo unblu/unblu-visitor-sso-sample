@@ -560,7 +560,9 @@ pre.rouge .gs {
 <ul class="sectlevel1">
 <li><a href="#_data_flow">Data flow</a></li>
 <li><a href="#_configuring_unblu_for_visitor_ss0">Configuring Unblu for visitor SS0</a></li>
+<li><a href="#_encrypting_the_jwt_payload">Encrypting the JWT payload</a></li>
 <li><a href="#_generating_an_rsa_key_pair_to_encrypt_the_jwt">Generating an RSA key pair to encrypt the JWT</a></li>
+<li><a href="#_generating_an_aes_encryption_key">Generating an AES encryption key</a></li>
 <li><a href="#_generating_a_jwt">Generating a JWT</a></li>
 <li><a href="#_starting_an_unblu_authentication_session_using_a_jwt">Starting an Unblu authentication session using a JWT</a></li>
 <li><a href="#_ending_an_unblu_session">Ending an Unblu session</a></li>
@@ -683,7 +685,8 @@ Use the configuration below to activate it.</p>
 <span class="py">com.unblu.authentication.jwt.expectedIssuer</span><span class="p">=</span><span class="s">https://application.example.com</span>
 <span class="py">com.unblu.authentication.jwt.expectedAudience</span><span class="p">=</span><span class="s">https://example.unblu.cloud</span>
 <span class="py">com.unblu.authentication.jwt.useEncryption</span><span class="p">=</span><span class="s">false</span>
-<span class="c">#com.unblu.authentication.jwt.encryptionKey=&lt;private key, if encryption is enabled&gt;
+<span class="c">#com.unblu.authentication.jwt.encryptionAlgorithm=&lt;RSA or AES&gt;
+#com.unblu.authentication.jwt.encryptionKey=&lt;private key, if encryption is enabled and encryptionAlgorithm is RSA. When encryptionAlgorithm is set to AES, it must be base64 encoded byte array of 256 bits length.&gt;
 </span>
 <span class="c"># Enable authenticator/loginWithSecureToken
 </span><span class="py">com.unblu.authentication.tokenSignup.enabled</span><span class="p">=</span><span class="s">true</span>
@@ -708,15 +711,23 @@ Use the configuration below to activate it.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_generating_an_rsa_key_pair_to_encrypt_the_jwt">Generating an RSA key pair to encrypt the JWT</h2>
+<h2 id="_encrypting_the_jwt_payload">Encrypting the JWT payload</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>You can encrypt the JWT.
 This will hide the content of the JWT payload from the visitor if they intercept the request in their browser.</p>
 </div>
 <div class="paragraph">
-<p>To use JWT encryption, generate an RSA key pair.
-Encryption uses a separate key pair, and the application uses Unblu&#8217;s public key to encrypt the JWT after signing it with its own private key.</p>
+<p>To use JWT encryption, configure encryption algorith to either RSA or AES and provide the encryption key accordingly.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_generating_an_rsa_key_pair_to_encrypt_the_jwt">Generating an RSA key pair to encrypt the JWT</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To use RSA JWT encryption, generate an RSA key pair.
+RSA encryption uses a separate key pair, and the application uses Unblu&#8217;s public key to encrypt the JWT after signing it with its own private key.</p>
 </div>
 <div class="paragraph">
 <p>The snippet belows shows how to generate an RSA key pair using <code>openssl</code>.</p>
@@ -726,6 +737,20 @@ Encryption uses a separate key pair, and the application uses Unblu&#8217;s publ
 <div class="content">
 <pre class="rouge highlight"><code data-lang="bash">openssl genpkey <span class="nt">-algorithm</span> RSA <span class="nt">-out</span> unblu.pem <span class="nt">-pkeyopt</span> rsa_keygen_bits:2048
 openssl rsa <span class="nt">-pubout</span> <span class="nt">-in</span> unblu.pem <span class="nt">-out</span> unblu_public.pem</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_generating_an_aes_encryption_key">Generating an AES encryption key</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To use AES JWT encryption, generate a base64 encoded byte array of 32 bytes length.</p>
+</div>
+<div class="listingblock">
+<div class="title">Generate AES encryption key</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="bash">openssl rand <span class="nt">-base64</span> 32</code></pre>
 </div>
 </div>
 </div>
@@ -788,10 +813,10 @@ You can check a JWT with a service such as <a href="https://jwt.io/">jwt.io</a>.
     <span class="p">.</span><span class="nf">type</span><span class="p">(</span><span class="nc">JOSEObjectType</span><span class="p">.</span><span class="nc">JWT</span><span class="p">)</span>
     <span class="p">.</span><span class="nf">keyID</span><span class="p">(</span><span class="n">key</span><span class="p">.</span><span class="n">keyID</span><span class="p">)</span>
     <span class="p">.</span><span class="nf">build</span><span class="p">()</span>
-<span class="kd">val</span> <span class="py">expiration</span> <span class="p">=</span> <span class="nc">Date</span><span class="p">(</span><span class="nc">System</span><span class="p">.</span><span class="nf">currentTimeMillis</span><span class="p">()</span> <span class="p">+</span> <span class="n">configuration</span><span class="p">.</span><span class="n">validFor</span><span class="p">.</span><span class="nf">toMillis</span><span class="p">())</span>
+<span class="kd">val</span> <span class="py">expiration</span> <span class="p">=</span> <span class="nc">Date</span><span class="p">(</span><span class="nc">System</span><span class="p">.</span><span class="nf">currentTimeMillis</span><span class="p">()</span> <span class="p">+</span> <span class="n">jwtConfig</span><span class="p">.</span><span class="n">validFor</span><span class="p">.</span><span class="nf">toMillis</span><span class="p">())</span>
 <span class="kd">val</span> <span class="py">payload</span> <span class="p">=</span> <span class="nc">JWTClaimsSet</span><span class="p">.</span><span class="nc">Builder</span><span class="p">()</span>
-    <span class="p">.</span><span class="nf">issuer</span><span class="p">(</span><span class="n">configuration</span><span class="p">.</span><span class="n">issuer</span><span class="p">)</span>
-    <span class="p">.</span><span class="nf">audience</span><span class="p">(</span><span class="n">configuration</span><span class="p">.</span><span class="n">audience</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">issuer</span><span class="p">(</span><span class="n">jwtConfig</span><span class="p">.</span><span class="n">issuer</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">audience</span><span class="p">(</span><span class="n">jwtConfig</span><span class="p">.</span><span class="n">audience</span><span class="p">)</span>
     <span class="p">.</span><span class="nf">issueTime</span><span class="p">(</span><span class="nc">Date</span><span class="p">())</span>
     <span class="p">.</span><span class="nf">expirationTime</span><span class="p">(</span><span class="n">expiration</span><span class="p">)</span> // <b class="conum">(1)</b>
     <span class="p">.</span><span class="nf">claim</span><span class="p">(</span><span class="s">"email"</span><span class="p">,</span> <span class="n">userInfo</span><span class="p">.</span><span class="n">email</span><span class="p">)</span>
@@ -804,19 +829,7 @@ You can check a JWT with a service such as <a href="https://jwt.io/">jwt.io</a>.
 
 <span class="n">signedJWT</span><span class="p">.</span><span class="nf">sign</span><span class="p">(</span><span class="n">signer</span><span class="p">)</span>
 
-<span class="kd">val</span> <span class="py">jwt</span><span class="p">:</span> <span class="nc">String</span> <span class="p">=</span> <span class="k">if</span> <span class="p">(</span><span class="n">configuration</span><span class="p">.</span><span class="n">encryption</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// Create JWE object with signed JWT as payload</span>
-    <span class="kd">val</span> <span class="py">jweHeader</span> <span class="p">=</span> <span class="nc">JWEHeader</span><span class="p">.</span><span class="nc">Builder</span><span class="p">(</span><span class="nc">JWEAlgorithm</span><span class="p">.</span><span class="nc">RSA_OAEP_256</span><span class="p">,</span> <span class="nc">EncryptionMethod</span><span class="p">.</span><span class="nc">A256GCM</span><span class="p">)</span>
-        <span class="p">.</span><span class="nf">contentType</span><span class="p">(</span><span class="s">"JWT"</span><span class="p">)</span>
-        <span class="p">.</span><span class="nf">build</span><span class="p">()</span>
-    <span class="kd">val</span> <span class="py">jweObject</span> <span class="p">=</span> <span class="nc">JWEObject</span><span class="p">(</span><span class="n">jweHeader</span><span class="p">,</span> <span class="nc">Payload</span><span class="p">(</span><span class="n">signedJWT</span><span class="p">))</span>
-    <span class="c1">// Encrypt with the recipient's public key</span>
-    <span class="n">jweObject</span><span class="p">.</span><span class="nf">encrypt</span><span class="p">(</span><span class="n">encrypter</span><span class="p">)</span>
-    <span class="n">jweObject</span><span class="p">.</span><span class="nf">serialize</span><span class="p">()</span>
-<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-    <span class="c1">// Create a signed JWT</span>
-    <span class="n">signedJWT</span><span class="p">.</span><span class="nf">serialize</span><span class="p">()</span>
-<span class="p">}</span></code></pre>
+<span class="kd">val</span> <span class="py">jwt</span><span class="p">:</span> <span class="nc">String</span> <span class="p">=</span> <span class="nf">createJwt</span><span class="p">(</span><span class="n">signedJWT</span><span class="p">)</span></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -995,15 +1008,15 @@ Your website should then use this subdomain to call Unblu.</p>
 <div class="title">Execute <code>logout</code> from the application backend (server-to-server API call)</div>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="kotlin"><span class="nd">@GetMapping</span><span class="p">(</span><span class="s">"logout"</span><span class="p">)</span>
-<span class="k">fun</span> <span class="nf">logout</span><span class="p">(</span><span class="n">session</span><span class="p">:</span> <span class="nc">WebSession</span><span class="p">)</span> <span class="p">:</span> <span class="nc">String</span> <span class="p">{</span>
+<span class="k">fun</span> <span class="nf">logout</span><span class="p">(</span><span class="n">session</span><span class="p">:</span> <span class="nc">WebSession</span><span class="p">):</span> <span class="nc">String</span> <span class="p">{</span>
     <span class="kd">val</span> <span class="py">header</span> <span class="p">=</span> <span class="nc">JWSHeader</span><span class="p">.</span><span class="nc">Builder</span><span class="p">(</span><span class="nc">JWSAlgorithm</span><span class="p">.</span><span class="nc">RS256</span><span class="p">)</span>
         <span class="p">.</span><span class="nf">type</span><span class="p">(</span><span class="nc">JOSEObjectType</span><span class="p">.</span><span class="nc">JWT</span><span class="p">)</span>
         <span class="p">.</span><span class="nf">keyID</span><span class="p">(</span><span class="n">key</span><span class="p">.</span><span class="n">keyID</span><span class="p">)</span>
         <span class="p">.</span><span class="nf">build</span><span class="p">()</span>
-    <span class="kd">val</span> <span class="py">expiration</span> <span class="p">=</span> <span class="nc">Date</span><span class="p">(</span><span class="nc">System</span><span class="p">.</span><span class="nf">currentTimeMillis</span><span class="p">()</span> <span class="p">+</span> <span class="n">configuration</span><span class="p">.</span><span class="n">validFor</span><span class="p">.</span><span class="nf">toMillis</span><span class="p">())</span>
+    <span class="kd">val</span> <span class="py">expiration</span> <span class="p">=</span> <span class="nc">Date</span><span class="p">(</span><span class="nc">System</span><span class="p">.</span><span class="nf">currentTimeMillis</span><span class="p">()</span> <span class="p">+</span> <span class="n">jwtConfig</span><span class="p">.</span><span class="n">validFor</span><span class="p">.</span><span class="nf">toMillis</span><span class="p">())</span>
     <span class="kd">val</span> <span class="py">payload</span> <span class="p">=</span> <span class="nc">JWTClaimsSet</span><span class="p">.</span><span class="nc">Builder</span><span class="p">()</span>
-        <span class="p">.</span><span class="nf">issuer</span><span class="p">(</span><span class="n">configuration</span><span class="p">.</span><span class="n">issuer</span><span class="p">)</span>
-        <span class="p">.</span><span class="nf">audience</span><span class="p">(</span><span class="n">configuration</span><span class="p">.</span><span class="n">audience</span><span class="p">)</span>
+        <span class="p">.</span><span class="nf">issuer</span><span class="p">(</span><span class="n">jwtConfig</span><span class="p">.</span><span class="n">issuer</span><span class="p">)</span>
+        <span class="p">.</span><span class="nf">audience</span><span class="p">(</span><span class="n">jwtConfig</span><span class="p">.</span><span class="n">audience</span><span class="p">)</span>
         <span class="p">.</span><span class="nf">issueTime</span><span class="p">(</span><span class="nc">Date</span><span class="p">())</span>
         <span class="p">.</span><span class="nf">expirationTime</span><span class="p">(</span><span class="n">expiration</span><span class="p">)</span> // <b class="conum">(1)</b>
         <span class="p">.</span><span class="nf">claim</span><span class="p">(</span><span class="s">"logoutToken"</span><span class="p">,</span> <span class="n">session</span><span class="p">.</span><span class="n">id</span><span class="p">)</span>
@@ -1011,22 +1024,10 @@ Your website should then use this subdomain to call Unblu.</p>
     <span class="kd">val</span> <span class="py">signedJWT</span> <span class="p">=</span> <span class="nc">SignedJWT</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
 
     <span class="n">signedJWT</span><span class="p">.</span><span class="nf">sign</span><span class="p">(</span><span class="n">signer</span><span class="p">)</span>
+    <span class="kd">val</span> <span class="py">jwt</span><span class="p">:</span> <span class="nc">String</span> <span class="p">=</span> <span class="nf">createJwt</span><span class="p">(</span><span class="n">signedJWT</span><span class="p">)</span>
 
-    <span class="kd">val</span> <span class="py">jwt</span><span class="p">:</span> <span class="nc">String</span> <span class="p">=</span> <span class="k">if</span> <span class="p">(</span><span class="n">configuration</span><span class="p">.</span><span class="n">encryption</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// Create JWE object with signed JWT as payload</span>
-        <span class="kd">val</span> <span class="py">jweHeader</span> <span class="p">=</span> <span class="nc">JWEHeader</span><span class="p">.</span><span class="nc">Builder</span><span class="p">(</span><span class="nc">JWEAlgorithm</span><span class="p">.</span><span class="nc">RSA_OAEP_256</span><span class="p">,</span> <span class="nc">EncryptionMethod</span><span class="p">.</span><span class="nc">A256GCM</span><span class="p">)</span>
-            <span class="p">.</span><span class="nf">contentType</span><span class="p">(</span><span class="s">"JWT"</span><span class="p">)</span>
-            <span class="p">.</span><span class="nf">build</span><span class="p">()</span>
-        <span class="kd">val</span> <span class="py">jweObject</span> <span class="p">=</span> <span class="nc">JWEObject</span><span class="p">(</span><span class="n">jweHeader</span><span class="p">,</span> <span class="nc">Payload</span><span class="p">(</span><span class="n">signedJWT</span><span class="p">))</span>
-        <span class="c1">// Encrypt with the recipient's public key</span>
-        <span class="n">jweObject</span><span class="p">.</span><span class="nf">encrypt</span><span class="p">(</span><span class="n">encrypter</span><span class="p">)</span>
-        <span class="n">jweObject</span><span class="p">.</span><span class="nf">serialize</span><span class="p">()</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="c1">// Create a signed JWT</span>
-        <span class="n">signedJWT</span><span class="p">.</span><span class="nf">serialize</span><span class="p">()</span>
-    <span class="p">}</span>
-
-    <span class="kd">val</span> <span class="py">targetURI</span> <span class="p">=</span> <span class="nc">URI</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="n">unbluConfiguration</span><span class="p">.</span><span class="n">serverUrl</span> <span class="p">+</span> <span class="n">unbluConfiguration</span><span class="p">.</span><span class="n">entryPath</span> <span class="p">+</span> <span class="s">"/rest/v4/authenticator/logoutWithSecureToken?x-unblu-apikey="</span> <span class="p">+</span> <span class="n">unbluConfiguration</span><span class="p">.</span><span class="n">apiKey</span><span class="p">)</span>
+    <span class="kd">val</span> <span class="py">targetURI</span> <span class="p">=</span>
+        <span class="nc">URI</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="n">unbluConfig</span><span class="p">.</span><span class="n">serverUrl</span> <span class="p">+</span> <span class="n">unbluConfig</span><span class="p">.</span><span class="n">entryPath</span> <span class="p">+</span> <span class="s">"/rest/v3/authenticator/logoutWithSecureToken?x-unblu-apikey="</span> <span class="p">+</span> <span class="n">unbluConfig</span><span class="p">.</span><span class="n">apiKey</span><span class="p">)</span>
     <span class="kd">val</span> <span class="py">client</span> <span class="p">=</span> <span class="nc">HttpClient</span><span class="p">.</span><span class="nf">newBuilder</span><span class="p">().</span><span class="nf">build</span><span class="p">()</span>
     <span class="kd">val</span> <span class="py">request</span> <span class="p">=</span> <span class="nc">HttpRequest</span><span class="p">.</span><span class="nf">newBuilder</span><span class="p">()</span>
         <span class="p">.</span><span class="nf">uri</span><span class="p">(</span><span class="n">targetURI</span><span class="p">)</span>
@@ -1036,6 +1037,7 @@ Your website should then use this subdomain to call Unblu.</p>
     <span class="kd">val</span> <span class="py">response</span> <span class="p">=</span> <span class="n">client</span><span class="p">.</span><span class="nf">send</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="nc">HttpResponse</span><span class="p">.</span><span class="nc">BodyHandlers</span><span class="p">.</span><span class="nf">ofString</span><span class="p">())</span>
 
     <span class="n">session</span><span class="p">.</span><span class="nf">invalidate</span><span class="p">()</span>
+        <span class="p">.</span><span class="nf">subscribe</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">response</span><span class="p">.</span><span class="nf">body</span><span class="p">()</span>
 <span class="p">}</span></code></pre>
@@ -1046,7 +1048,7 @@ Your website should then use this subdomain to call Unblu.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-18 10:24:21 UTC
+Last updated 2025-01-03 08:33:58 UTC
 </div>
 </div>
 </body>
