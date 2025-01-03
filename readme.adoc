@@ -95,6 +95,20 @@ IIQdfNOVVaTOS+OHMuwNraA=
 -----END PRIVATE KEY-----
 ----
 
+== AES encryption key for testing
+
+.AES encryption key
+[source]
+----
+JlFjDP9IHFv4Nho0Rk1lnPC/k7xh29uFImTyX0nDI5g=
+----
+
+.key generation
+[bash]
+----
+openssl rand -base64 32
+----
+
 == Known Issues
 
 None

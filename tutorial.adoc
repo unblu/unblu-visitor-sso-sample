@@ -56,7 +56,8 @@ com.unblu.authentication.jwt.jwkUrl=https://application.example.com/api/jwk
 com.unblu.authentication.jwt.expectedIssuer=https://application.example.com
 com.unblu.authentication.jwt.expectedAudience=https://example.unblu.cloud
 com.unblu.authentication.jwt.useEncryption=false
-#com.unblu.authentication.jwt.encryptionKey=<private key, if encryption is enabled>
+#com.unblu.authentication.jwt.encryptionAlgorithm=<RSA or AES>
+#com.unblu.authentication.jwt.encryptionKey=<private key, if encryption is enabled and encryptionAlgorithm is RSA. When encryptionAlgorithm is set to AES, it must be base64 encoded byte array of 256 bits length.>
 
 # Enable authenticator/loginWithSecureToken
 com.unblu.authentication.tokenSignup.enabled=true
@@ -77,13 +78,17 @@ com.unblu.authentication.tokenSignup.claimMapping.lastName=lastName
 The URL configured in the `jwkUrl` property must be accessible from the Unblu server.
 `expectedIssuer` and `expectedAudience` must match the `iss` and `aud` claims as set by the application.
 
-== Generating an RSA key pair to encrypt the JWT
+== Encrypting the JWT payload
 
 You can encrypt the JWT.
 This will hide the content of the JWT payload from the visitor if they intercept the request in their browser.
 
-To use JWT encryption, generate an RSA key pair.
-Encryption uses a separate key pair, and the application uses Unblu's public key to encrypt the JWT after signing it with its own private key.
+To use JWT encryption, configure encryption algorith to either RSA or AES and provide the encryption key accordingly.
+
+== Generating an RSA key pair to encrypt the JWT
+
+To use RSA JWT encryption, generate an RSA key pair.
+RSA encryption uses a separate key pair, and the application uses Unblu's public key to encrypt the JWT after signing it with its own private key.
 
 The snippet belows shows how to generate an RSA key pair using `openssl`.
 
@@ -92,6 +97,16 @@ The snippet belows shows how to generate an RSA key pair using `openssl`.
 ----
 openssl genpkey -algorithm RSA -out unblu.pem -pkeyopt rsa_keygen_bits:2048
 openssl rsa -pubout -in unblu.pem -out unblu_public.pem
+----
+
+== Generating an AES encryption key
+
+To use AES JWT encryption, generate a base64 encoded byte array of 32 bytes length.
+
+.Generate AES encryption key
+[source, bash]
+----
+openssl rand -base64 32
 ----
 
 == Generating a JWT

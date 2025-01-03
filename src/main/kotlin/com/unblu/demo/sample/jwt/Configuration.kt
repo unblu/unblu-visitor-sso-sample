@@ -11,7 +11,8 @@ data class JwtConfiguration(
         val issuer: String,
         val audience: String,
         val validFor: Duration,
-        val encryption: Boolean
+        val encryption: Boolean,
+        val encryptionAlgorithm: JWTEncryptionAlgorithm
 )
 
 @ConstructorBinding
@@ -20,5 +21,6 @@ data class UnbluConfiguration(
         val serverUrl: String,
         val entryPath: String,
         val apiKey: String,
-        val publicKey: Resource
+        val publicKey: Resource,
+        val aesEncryptionKey: String
 )
