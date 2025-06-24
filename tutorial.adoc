@@ -237,3 +237,15 @@ include::src/main/resources/static/application.js[tag=clientLogout]
 ----
 include::src/main/kotlin/com/unblu/demo/sample/jwt/ApiController.kt[tag=logout]
 ----
+
+.Hardening an absolute authentication session timeout value
+[source,ini]
+----
+# Idle session timeout in seconds. Set to a lower value,
+# for example 3600 (1h). The default value is 24 hours.
+com.unblu.authentication.cloud.maxIdleSeconds=86400
+
+# Absolute session timeout. Set to a lower value,
+# for example 43200 (12h). The default value is 7 days.
+com.unblu.authentication.cloud.maxTimeToLiveSeconds=604800
+----
