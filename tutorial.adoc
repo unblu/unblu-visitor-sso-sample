@@ -80,7 +80,7 @@ The URL configured in the `jwkUrl` property must be accessible from the Unblu se
 
 === Configuring authentication session timeouts
 
-If you're looking into ending authentication sessions--for example, as described <<#ending-an-unblu-session, below>>--you may also want to review the following configuration properties:
+If you're looking into ending authentication sessions--for example, as described <<#ending-an-unblu-session, below>>--you may also want to review the following configuration properties, which apply to both visitors and agents:
 
 .Authentication session timeouts
 [source,ini]
@@ -92,6 +92,8 @@ com.unblu.authentication.cloud.maxIdleSeconds=86400
 # Absolute session timeout in seconds. Set to a lower value,
 # for example 43200 (12h). The default value is equal to 7 days.
 com.unblu.authentication.cloud.maxTimeToLiveSeconds=604800
+
+# We recommend asymmetric (RSA) keys for authentication to enhance security.
 ----
 
 == Encrypting the JWT payload
