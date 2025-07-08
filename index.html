@@ -559,7 +559,11 @@ pre.rouge .gs {
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#_data_flow">Data flow</a></li>
-<li><a href="#_configuring_unblu_for_visitor_ss0">Configuring Unblu for visitor SS0</a></li>
+<li><a href="#_configuring_unblu_for_visitor_sso">Configuring Unblu for visitor SSO</a>
+<ul class="sectlevel2">
+<li><a href="#_configuring_authentication_session_timeouts">Configuring authentication session timeouts</a></li>
+</ul>
+</li>
 <li><a href="#_encrypting_the_jwt_payload">Encrypting the JWT payload</a></li>
 <li><a href="#_generating_an_rsa_key_pair_to_encrypt_the_jwt">Generating an RSA key pair to encrypt the JWT</a></li>
 <li><a href="#_generating_an_aes_encryption_key">Generating an AES encryption key</a></li>
@@ -661,7 +665,7 @@ If they don&#8217;t, some browsers&#8201;&#8212;&#8201;Safari, for example&#8201
 </div>
 </div>
 <div class="sect1">
-<h2 id="_configuring_unblu_for_visitor_ss0">Configuring Unblu for visitor SS0</h2>
+<h2 id="_configuring_unblu_for_visitor_sso">Configuring Unblu for visitor SSO</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>By default, visitor SSO is disabled.
@@ -708,6 +712,26 @@ Use the configuration below to activate it.</p>
 <p>The URL configured in the <code>jwkUrl</code> property must be accessible from the Unblu server.
 <code>expectedIssuer</code> and <code>expectedAudience</code> must match the <code>iss</code> and <code>aud</code> claims as set by the application.</p>
 </div>
+<div class="sect2">
+<h3 id="_configuring_authentication_session_timeouts">Configuring authentication session timeouts</h3>
+<div class="paragraph">
+<p>If you&#8217;re looking into ending authentication sessions&#8212;&#8203;for example, as described <a href="#ending-an-unblu-session">below</a>--you may also want to review the following configuration properties, which apply to both visitors and agents:</p>
+</div>
+<div class="listingblock">
+<div class="title">Authentication session timeouts</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="ini"><span class="c"># Idle session timeout in seconds. Set to a lower value,
+# for example 3600 (1h). The default value is equal to 24 hours.
+</span><span class="py">com.unblu.authentication.cloud.maxIdleSeconds</span><span class="p">=</span><span class="s">86400</span>
+
+<span class="c"># Absolute session timeout in seconds. Set to a lower value,
+# for example 43200 (12h). The default value is equal to 7 days.
+</span><span class="py">com.unblu.authentication.cloud.maxTimeToLiveSeconds</span><span class="p">=</span><span class="s">604800</span>
+
+<span class="err">#</span> <span class="err">We</span> <span class="err">recommend</span> <span class="err">asymmetric</span> <span class="err">(RSA)</span> <span class="err">keys</span> <span class="err">for</span> <span class="err">authentication</span> <span class="err">to</span> <span class="err">enhance</span> <span class="err">security.</span></code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -718,7 +742,7 @@ Use the configuration below to activate it.</p>
 This will hide the content of the JWT payload from the visitor if they intercept the request in their browser.</p>
 </div>
 <div class="paragraph">
-<p>To use JWT encryption, configure encryption algorith to either RSA or AES and provide the encryption key accordingly.</p>
+<p>To use JWT encryption, configure encryption algorithm to either RSA or AES and provide the encryption key accordingly.</p>
 </div>
 </div>
 </div>
@@ -975,6 +999,10 @@ Your website should then use this subdomain to call Unblu.</p>
 <div class="paragraph">
 <p>Depending on your risk assessment, you may want to end the Unblu session when the application performs a logout.</p>
 </div>
+<div class="paragraph">
+<p>Unblu has configuration properties for authentication session timeouts.
+You can check them out <a href="#configuring-authentication-session-timeouts">here</a>.</p>
+</div>
 <div class="listingblock">
 <div class="title">Call <code>clientLogout</code> from the visitor&#8217;s browser</div>
 <div class="content">
@@ -1048,7 +1076,7 @@ Your website should then use this subdomain to call Unblu.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-01-03 08:33:58 UTC
+Last updated 2025-07-08 14:04:32 UTC
 </div>
 </div>
 </body>
