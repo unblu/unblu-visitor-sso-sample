@@ -33,7 +33,7 @@ Unblu will cache the keys and therefore not request it for every validation.
 IMPORTANT: The Unblu backend and the host application must be running in the same second-level domain (e.g. `example.com`).
 If they don't, some browsers -- Safari, for example -- will treat the Unblu authentication cookie as a third-party cookie and block it.
 
-== Configuring Unblu for visitor SS0
+== Configuring Unblu for visitor SSO
 
 By default, visitor SSO is disabled.
 Use the configuration below to activate it.
@@ -78,12 +78,30 @@ com.unblu.authentication.tokenSignup.claimMapping.lastName=lastName
 The URL configured in the `jwkUrl` property must be accessible from the Unblu server.
 `expectedIssuer` and `expectedAudience` must match the `iss` and `aud` claims as set by the application.
 
+=== Configuring authentication session timeouts
+
+If you're looking into ending authentication sessions--for example, as described <<#ending-an-unblu-session, below>>--you may also want to review the following configuration properties, which apply to both visitors and agents:
+
+.Authentication session timeouts
+[source,ini]
+----
+# Idle session timeout in seconds. Set to a lower value,
+# for example 3600 (1h). The default value is equal to 24 hours.
+com.unblu.authentication.cloud.maxIdleSeconds=86400
+
+# Absolute session timeout in seconds. Set to a lower value,
+# for example 43200 (12h). The default value is equal to 7 days.
+com.unblu.authentication.cloud.maxTimeToLiveSeconds=604800
+
+# We recommend asymmetric (RSA) keys for authentication to enhance security.
+----
+
 == Encrypting the JWT payload
 
 You can encrypt the JWT.
 This will hide the content of the JWT payload from the visitor if they intercept the request in their browser.
 
-To use JWT encryption, configure encryption algorith to either RSA or AES and provide the encryption key accordingly.
+To use JWT encryption, configure encryption algorithm to either RSA or AES and provide the encryption key accordingly.
 
 == Generating an RSA key pair to encrypt the JWT
 
@@ -225,6 +243,9 @@ Your website should then use this subdomain to call Unblu.
 == Ending an Unblu session
 
 Depending on your risk assessment, you may want to end the Unblu session when the application performs a logout.
+
+Unblu has configuration properties for authentication session timeouts.
+You can check them out <<#configuring-authentication-session-timeouts,here>>.
 
 .Call `clientLogout` from the visitor's browser
 [source,javascript,indent=0]
