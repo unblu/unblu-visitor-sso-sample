@@ -13,7 +13,7 @@ jobs:
           java-version: 21
           cache: gradle
       - name: Build with Java 21 and run tests
-        run: ./gradlew clean build test
+        run: ./gradlew clean build test --console=plain
 
   publish:
     name: Publish image to Github Container Registry 📦
@@ -34,8 +34,9 @@ jobs:
           ./gradlew jib \
             -Djib.to.tags=${GITHUB_SHA::8},latest \
             -Djib.to.auth.username=${{ github.repository_owner }} \
-            -Djib.to.auth.password=${{ secrets.GITHUB_TOKEN }}
+            -Djib.to.auth.password=${{ secrets.GITHUB_TOKEN }} \
+            --console=plain
       - name: Build image (dry-run)
         if: github.ref != 'refs/heads/main'
         run: |
-          ./gradlew jibDockerBuild
+          ./gradlew jibDockerBuild --console=plain
