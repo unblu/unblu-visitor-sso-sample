@@ -17,4 +17,3 @@ class MainController(private val unbluConfiguration: UnbluConfiguration) {
     }
 
 }
-

@@ -1,16 +1,20 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
-	id("org.springframework.boot") version "2.4.1"
-	id("io.spring.dependency-management") version "1.0.10.RELEASE"
-	kotlin("jvm") version "1.5.30"
-	kotlin("plugin.spring") version "1.5.30"
+	id("org.springframework.boot") version "3.4.3"
+	id("io.spring.dependency-management") version "1.1.7"
+	kotlin("jvm") version "1.9.25"
+	kotlin("plugin.spring") version "1.9.25"
 }
 
 group = "com.unblu.demo"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_11
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
 
 repositories {
 	mavenCentral()
@@ -29,13 +33,13 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 
-	implementation("com.nimbusds:nimbus-jose-jwt:9.1.3")
+	implementation("com.nimbusds:nimbus-jose-jwt:10.8")
 	implementation("org.bouncycastle:bcprov-jdk15on:[1.61,)")
 	implementation("org.bouncycastle:bcpkix-jdk15on:[1.61,)")
 
 	// WebJars
-	implementation("org.webjars:webjars-locator-core:0.46")
-	implementation("org.webjars:bootstrap:5.0.1")
+	implementation("org.webjars:webjars-locator-core:0.59")
+	implementation("org.webjars:bootstrap:5.3.8")
 
 	// Testing
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -45,13 +49,13 @@ dependencies {
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 }
 
-tasks.withType<Test> {
-	useJUnitPlatform()
-}
-
 tasks.withType<KotlinCompile> {
 	kotlinOptions {
-		freeCompilerArgs = listOf("-Xjsr305=strict")
-		jvmTarget = "11"
+		freeCompilerArgs = listOf("-Xjsr305=strict", "-Xannotation-default-target=param-property")
+		jvmTarget = "17"
 	}
+}
+
+tasks.withType<Test> {
+	useJUnitPlatform()
 }
