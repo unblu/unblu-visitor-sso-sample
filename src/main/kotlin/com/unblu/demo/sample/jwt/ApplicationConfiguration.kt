@@ -10,7 +10,8 @@ data class JwtConfiguration(
         val audience: String,
         val validFor: Duration,
         val encryption: Boolean,
-        val encryptionAlgorithm: JWTEncryptionAlgorithm
+        val encryptionAlgorithm: JWTEncryptionAlgorithm,
+        val allowedOrigins: List<String>
 )
 
 @ConfigurationProperties(prefix = "unblu")
@@ -19,5 +20,6 @@ data class UnbluConfiguration(
         val entryPath: String,
         val apiKey: String,
         val publicKey: Resource,
-        val aesEncryptionKey: String
+        val aesEncryptionKey: String,
+        val idpServerUrl: String
 )

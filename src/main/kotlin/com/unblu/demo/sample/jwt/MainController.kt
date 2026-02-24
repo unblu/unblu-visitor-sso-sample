@@ -13,6 +13,7 @@ class MainController(private val unbluConfiguration: UnbluConfiguration) {
         model["unbluServerUrl"] = unbluConfiguration.serverUrl
         model["unbluEntryPath"] = unbluConfiguration.entryPath
         model["unbluApiKey"] = unbluConfiguration.apiKey
+        model["idpServerUrl"] = unbluConfiguration.idpServerUrl
         return "index"
     }
 

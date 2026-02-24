@@ -2,11 +2,12 @@
 'use strict';
 
 class SampleApp {
-  constructor (unbluServerUrl, unbluEntryPath, unbluApiKey) {
+  constructor (unbluServerUrl, unbluEntryPath, unbluApiKey, idpServerUrl) {
     this.unbluServerUrl = unbluServerUrl;
     this.unbluEntryPath = unbluEntryPath;
     this.unbluBaseUrl = unbluServerUrl + unbluEntryPath;
     this.unbluApiKey = unbluApiKey;
+    this.idpServerUrl = idpServerUrl;
   }
 
   /**
@@ -67,7 +68,7 @@ class SampleApp {
       },
       body: JSON.stringify(tokenRequest)
     };
-    fetch('/api/token', request)
+    fetch(this.idpServerUrl + '/api/token', request)
       .then((response) => {
         return response.json();
       })
@@ -145,7 +146,7 @@ class SampleApp {
     const request = {
       method: 'GET'
     };
-    return fetch('/api/logout')
+    return fetch(this.idpServerUrl + '/api/logout')
       .then((response) => {
         if (response.ok) {
           console.log('Unblu logout successful');

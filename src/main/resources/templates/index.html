@@ -71,8 +71,9 @@ window.onload = async function WindowLoad(event) {
     var unbluServerUrl = [[${unbluServerUrl}]];
     var unbluEntryPath = [[${unbluEntryPath}]];
     var unbluApiKey = [[${unbluApiKey}]];
+    var idpServerUrl = [[${idpServerUrl}]];
 
-    var sampleApp = new SampleApp(unbluServerUrl, unbluEntryPath, unbluApiKey);
+    var sampleApp = new SampleApp(unbluServerUrl, unbluEntryPath, unbluApiKey, idpServerUrl);
     sampleApp.init();
 
     document.getElementById('login').addEventListener("click", sampleApp.login.bind(sampleApp));
