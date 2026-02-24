@@ -3,40 +3,40 @@ on: [ push ]
 jobs:
   test:
     runs-on: ubuntu-latest
-    name: Run tests with JDK 11 🧪
+    name: Run tests with JDK 21 🧪
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up JDK 11
-        uses: actions/setup-java@v1
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
         with:
-          java-version: 11
-      - name: Build with Java 11 and run tests
-        run: ./gradlew clean build test
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+      - name: Build with Java 21 and run tests
+        run: ./gradlew clean build test --console=plain
+
   publish:
     name: Publish image to Github Container Registry 📦
     runs-on: ubuntu-latest
     needs: [ test ]
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up JDK 11
-        uses: actions/setup-java@v1
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
         with:
-          java-version: 11
+          distribution: temurin
+          java-version: 21
+          cache: gradle
       - name: Build image
+        if: github.ref == 'refs/heads/main'
         run: |
           ./gradlew --version
-          ./gradlew bootBuildImage --imageName=unblu-visitor-sso-sample
-      - name: Login to GitHub Container Registry
-        if: github.ref == 'refs/heads/main'
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Tag and push image
-        if: github.ref == 'refs/heads/main'
+          ./gradlew jib \
+            -Djib.to.tags=${GITHUB_SHA::8},latest \
+            -Djib.to.auth.username=${{ github.repository_owner }} \
+            -Djib.to.auth.password=${{ secrets.GITHUB_TOKEN }} \
+            --console=plain
+      - name: Build image (dry-run)
+        if: github.ref != 'refs/heads/main'
         run: |
-          docker tag unblu-visitor-sso-sample ghcr.io/unblu/unblu-visitor-sso-sample
-          docker tag unblu-visitor-sso-sample ghcr.io/unblu/unblu-visitor-sso-sample:${GITHUB_SHA::8}
-          docker push ghcr.io/unblu/unblu-visitor-sso-sample
-          docker push ghcr.io/unblu/unblu-visitor-sso-sample:${GITHUB_SHA::8}
+          ./gradlew jibDockerBuild --console=plain

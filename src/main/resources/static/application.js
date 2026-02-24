@@ -22,7 +22,7 @@ class SampleApp {
       signInForm.style.display = 'none';
       signOutForm.style.display = 'block';
       // Initialize Unblu
-      const unbluAPI = window.unblu.floating.api.configure({
+      const unbluAPI = await window.unblu.floating.api.configure({
         serverUrl: this.unbluServerUrl,
         entryPath: this.unbluEntryPath,
         apiKey: this.unbluApiKey,
@@ -44,14 +44,8 @@ class SampleApp {
   async checkAuthentication () {
     const options = { credentials: 'include' }; // <1>
     const response = await fetch(this.unbluBaseUrl + '/rest/v4/authenticator/getCurrentPerson', options);
-
-    if (!response.ok) {
-      const message = `An error has occurred: ${response.status}`;
-      throw new Error(message);
-    }
-
     const data = await response.json();
-    return data.authorizationRole === 'WEBUSER';
+    return response.ok ? data.authorizationRole === 'WEBUSER' : false;
   }
   // end::checkAuthentication[]
 
