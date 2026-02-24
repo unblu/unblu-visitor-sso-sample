@@ -44,14 +44,8 @@ class SampleApp {
   async checkAuthentication () {
     const options = { credentials: 'include' }; // <1>
     const response = await fetch(this.unbluBaseUrl + '/rest/v4/authenticator/getCurrentPerson', options);
-
-    if (!response.ok) {
-      const message = `An error has occurred: ${response.status}`;
-      throw new Error(message);
-    }
-
     const data = await response.json();
-    return data.authorizationRole === 'WEBUSER';
+    return response.ok ? data.authorizationRole === 'WEBUSER' : false;
   }
   // end::checkAuthentication[]
 
