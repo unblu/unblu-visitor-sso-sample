@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.23">
+<meta name="generator" content="Asciidoctor 2.0.26">
 <title>Unblu visitor single sign-on (SSO)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -116,7 +116,6 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 :not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
 pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre>code{display:block}
 pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 em em{font-style:normal}
 strong strong{font-weight:400}
@@ -219,6 +218,7 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
 .literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
 .listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
 .listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
 .listingblock:hover code[data-lang]::before{display:block}
 .listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
@@ -678,34 +678,34 @@ Use the configuration below to activate it.</p>
 # and authentication cookies are set on the correct path
 </span><span class="py">com.unblu.identifier.publicPathPrefix</span><span class="p">=</span><span class="s">${systemIdentifier}</span>
 <span class="py">com.unblu.identifier.restrictedPathPrefix</span><span class="p">=</span><span class="s">co-${systemIdentifier}</span>
-
-<span class="c"># Visitor SSO is typically used in a cross-site setup, so we disable
+<span class="w">
+</span><span class="c"># Visitor SSO is typically used in a cross-site setup, so we disable
 # site-embedded mode
 </span><span class="py">com.unblu.identifier.siteEmbeddedSetup</span><span class="p">=</span><span class="s">false</span>
-
-<span class="py">com.unblu.authentication.untrusted.sources</span><span class="p">=</span><span class="s">LOCAL</span>
-
-<span class="py">com.unblu.authentication.jwt.jwkUrl</span><span class="p">=</span><span class="s">https://application.example.com/api/jwk</span>
+<span class="w">
+</span><span class="py">com.unblu.authentication.untrusted.sources</span><span class="p">=</span><span class="s">LOCAL</span>
+<span class="w">
+</span><span class="py">com.unblu.authentication.jwt.jwkUrl</span><span class="p">=</span><span class="s">https://application.example.com/api/jwk</span>
 <span class="py">com.unblu.authentication.jwt.expectedIssuer</span><span class="p">=</span><span class="s">https://application.example.com</span>
 <span class="py">com.unblu.authentication.jwt.expectedAudience</span><span class="p">=</span><span class="s">https://example.unblu.cloud</span>
 <span class="py">com.unblu.authentication.jwt.useEncryption</span><span class="p">=</span><span class="s">false</span>
 <span class="c">#com.unblu.authentication.jwt.encryptionAlgorithm=&lt;RSA or AES&gt;
 #com.unblu.authentication.jwt.encryptionKey=&lt;private key, if encryption is enabled and encryptionAlgorithm is RSA. When encryptionAlgorithm is set to AES, it must be base64 encoded byte array of 256 bits length.&gt;
-</span>
-<span class="c"># Enable authenticator/loginWithSecureToken
+</span><span class="w">
+</span><span class="c"># Enable authenticator/loginWithSecureToken
 </span><span class="py">com.unblu.authentication.tokenSignup.enabled</span><span class="p">=</span><span class="s">true</span>
 <span class="py">com.unblu.authentication.tokenSignup.claimMapping.username</span><span class="p">=</span><span class="s">username</span>
 <span class="py">com.unblu.authentication.tokenSignup.claimMapping.email</span><span class="p">=</span><span class="s">email</span>
 <span class="py">com.unblu.authentication.tokenSignup.claimMapping.firstName</span><span class="p">=</span><span class="s">firstName</span>
 <span class="py">com.unblu.authentication.tokenSignup.claimMapping.lastName</span><span class="p">=</span><span class="s">lastName</span>
-
-<span class="c"># To use cross-site cookies, most browsers require that you use HTTPS.
+<span class="w">
+</span><span class="c"># To use cross-site cookies, most browsers require that you use HTTPS.
 # Enable the configuration properties below if you run the application without
 # a reverse proxy providing HTTPS connections.
 #com.unblu.identifier.cookieSecureFlag=true
 #com.unblu.runtime.jetty.securehttpenabled=true
 #com.unblu.runtime.jetty.keystorepath=tls.p12
-</span><span class="err">#</span><span class="py">com.unblu.runtime.jetty.keystorepassword</span><span class="p">=</span><span class="s">password</span></code></pre>
+</span><span class="na">#</span><span class="py">com.unblu.runtime.jetty.keystorepassword</span><span class="p">=</span><span class="s">password</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -723,12 +723,12 @@ Use the configuration below to activate it.</p>
 <pre class="rouge highlight"><code data-lang="ini"><span class="c"># Idle session timeout in seconds. Set to a lower value,
 # for example 3600 (1h). The default value is equal to 24 hours.
 </span><span class="py">com.unblu.authentication.cloud.maxIdleSeconds</span><span class="p">=</span><span class="s">86400</span>
-
-<span class="c"># Absolute session timeout in seconds. Set to a lower value,
+<span class="w">
+</span><span class="c"># Absolute session timeout in seconds. Set to a lower value,
 # for example 43200 (12h). The default value is equal to 7 days.
 </span><span class="py">com.unblu.authentication.cloud.maxTimeToLiveSeconds</span><span class="p">=</span><span class="s">604800</span>
-
-<span class="err">#</span> <span class="err">We</span> <span class="err">recommend</span> <span class="err">asymmetric</span> <span class="err">(RSA)</span> <span class="err">keys</span> <span class="err">for</span> <span class="err">authentication</span> <span class="err">to</span> <span class="err">enhance</span> <span class="err">security.</span></code></pre>
+<span class="w">
+</span><span class="na">#</span><span class="w"> </span><span class="na">We</span><span class="w"> </span><span class="na">recommend</span><span class="w"> </span><span class="na">asymmetric</span><span class="w"> </span><span class="na">(RSA)</span><span class="w"> </span><span class="na">keys</span><span class="w"> </span><span class="na">for</span><span class="w"> </span><span class="na">authentication</span><span class="w"> </span><span class="na">to</span><span class="w"> </span><span class="na">enhance</span><span class="w"> </span><span class="na">security.</span></code></pre>
 </div>
 </div>
 </div>
@@ -926,14 +926,8 @@ We recommend calling this endpoint before starting a new authentication.</p>
 <span class="k">async</span> <span class="nf">checkAuthentication </span><span class="p">()</span> <span class="p">{</span>
   <span class="kd">const</span> <span class="nx">options</span> <span class="o">=</span> <span class="p">{</span> <span class="na">credentials</span><span class="p">:</span> <span class="dl">'</span><span class="s1">include</span><span class="dl">'</span> <span class="p">};</span> // <b class="conum">(1)</b>
   <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">unbluBaseUrl</span> <span class="o">+</span> <span class="dl">'</span><span class="s1">/rest/v4/authenticator/getCurrentPerson</span><span class="dl">'</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
-
-  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">const</span> <span class="nx">message</span> <span class="o">=</span> <span class="s2">`An error has occurred: </span><span class="p">${</span><span class="nx">response</span><span class="p">.</span><span class="nx">status</span><span class="p">}</span><span class="s2">`</span><span class="p">;</span>
-    <span class="k">throw</span> <span class="k">new</span> <span class="nc">Error</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
-  <span class="p">}</span>
-
   <span class="kd">const</span> <span class="nx">data</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">response</span><span class="p">.</span><span class="nf">json</span><span class="p">();</span>
-  <span class="k">return</span> <span class="nx">data</span><span class="p">.</span><span class="nx">authorizationRole</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">WEBUSER</span><span class="dl">'</span><span class="p">;</span>
+  <span class="k">return</span> <span class="nx">response</span><span class="p">.</span><span class="nx">ok</span> <span class="p">?</span> <span class="nx">data</span><span class="p">.</span><span class="nx">authorizationRole</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">WEBUSER</span><span class="dl">'</span> <span class="p">:</span> <span class="kc">false</span><span class="p">;</span>
 <span class="p">}</span></code></pre>
 </div>
 </div>
@@ -1076,7 +1070,7 @@ You can check them out <a href="#configuring-authentication-session-timeouts">he
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-07-08 14:04:32 UTC
+Last updated 2026-02-24 12:46:31 UTC
 </div>
 </div>
 </body>
