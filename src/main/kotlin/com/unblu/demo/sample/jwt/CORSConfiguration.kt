@@ -23,6 +23,7 @@ class CORSConfiguration(private val jwtConfiguration: JwtConfiguration) {
 
             logger.debug("CORS request from: {} -> {}, validateOrigin: {}", origin, jwtConfiguration.allowedOrigins, validateOrigin)
 
+            if (origin.isNullOrBlank()) return@CorsConfigurationSource null
             if (validateOrigin && !isAllowedOrigin(origin, jwtConfiguration.allowedOrigins)) return@CorsConfigurationSource null
 
             CorsConfiguration().apply {
@@ -36,10 +37,7 @@ class CORSConfiguration(private val jwtConfiguration: JwtConfiguration) {
         return CorsWebFilter(source)
     }
 
-    private fun isAllowedOrigin(origin: String?, allowedPatterns: List<String>): Boolean {
-        if (origin.isNullOrBlank()) return false
-        if (allowedPatterns.size == 1 && allowedPatterns[0] == "*") return true
-
+    private fun isAllowedOrigin(origin: String, allowedPatterns: List<String>): Boolean {
         val originUri = try {
             URI(origin)
         } catch(ex: Exception) {
