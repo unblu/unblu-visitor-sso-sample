@@ -21,7 +21,7 @@ class CORSConfiguration(private val jwtConfiguration: JwtConfiguration) {
             val origin = exchange.request.headers.origin
             val validateOrigin = !(jwtConfiguration.allowedOrigins.size == 1 && jwtConfiguration.allowedOrigins[0] == "*")
 
-            logger.info("CORS request from: {} -> {}, validateOrigin: {}", origin, jwtConfiguration.allowedOrigins, validateOrigin)
+            logger.debug("CORS request from: {} -> {}, validateOrigin: {}", origin, jwtConfiguration.allowedOrigins, validateOrigin)
 
             if (validateOrigin && !isAllowedOrigin(origin, jwtConfiguration.allowedOrigins)) return@CorsConfigurationSource null
 
