@@ -11,7 +11,7 @@ import org.springframework.web.cors.reactive.CorsWebFilter
 import org.springframework.web.server.ServerWebExchange
 
 @Configuration
-class CORSConfiguration(private val jwtConfiguration: JwtConfiguration) {
+class CORSConfiguration(private val appConfiguration: AppConfiguration) {
 
     private val logger: Logger = LoggerFactory.getLogger(CORSConfiguration::class.java)
 
@@ -19,12 +19,12 @@ class CORSConfiguration(private val jwtConfiguration: JwtConfiguration) {
     fun corsWebFilter(): CorsWebFilter {
         val source = CorsConfigurationSource { exchange: ServerWebExchange ->
             val origin = exchange.request.headers.origin
-            val validateOrigin = !(jwtConfiguration.allowedOrigins.size == 1 && jwtConfiguration.allowedOrigins[0] == "*")
+            val validateOrigin = !(appConfiguration.allowedOrigins.size == 1 && appConfiguration.allowedOrigins[0] == "*")
 
-            logger.debug("CORS request from: {} -> {}, validateOrigin: {}", origin, jwtConfiguration.allowedOrigins, validateOrigin)
+            logger.debug("CORS request from: {} -> {}, validateOrigin: {}", origin, appConfiguration.allowedOrigins, validateOrigin)
 
             if (origin.isNullOrBlank()) return@CorsConfigurationSource null
-            if (validateOrigin && !isAllowedOrigin(origin, jwtConfiguration.allowedOrigins)) return@CorsConfigurationSource null
+            if (validateOrigin && !isAllowedOrigin(origin, appConfiguration.allowedOrigins)) return@CorsConfigurationSource null
 
             CorsConfiguration().apply {
                 allowedOrigins = listOf(origin)
