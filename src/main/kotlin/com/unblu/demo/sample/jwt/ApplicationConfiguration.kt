@@ -4,6 +4,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.core.io.Resource
 import java.time.Duration
 
+@ConfigurationProperties(prefix = "application")
+data class AppConfiguration(
+        val baseUrl: String,
+        val allowedOrigins: List<String>
+)
+
 @ConfigurationProperties(prefix = "jwt")
 data class JwtConfiguration(
         val issuer: String,
