@@ -613,7 +613,7 @@ Logging in to Unblu using a JWT was introduced in Unblu 6.13.0.
 </div>
 </div>
 <div class="sect1">
-<h2 id="_data_flow">Data flow</h2>
+<h2 id="_data_flow"><a class="anchor" href="#_data_flow"></a>Data flow</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The diagram below illustrates the order in which data flows between a visitor, your application, and the Unblu server during visitor SSO.</p>
@@ -665,14 +665,14 @@ If they don&#8217;t, some browsers&#8201;&#8212;&#8201;Safari, for example&#8201
 </div>
 </div>
 <div class="sect1">
-<h2 id="_configuring_unblu_for_visitor_sso">Configuring Unblu for visitor SSO</h2>
+<h2 id="_configuring_unblu_for_visitor_sso"><a class="anchor" href="#_configuring_unblu_for_visitor_sso"></a>Configuring Unblu for visitor SSO</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>By default, visitor SSO is disabled.
 Use the configuration below to activate it.</p>
 </div>
 <div class="listingblock">
-<div class="title">Visitor SSO Configuration in Unblu</div>
+<div class="title">Listing 1. Visitor SSO Configuration in Unblu</div>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="ini"><span class="c"># Ensure that /unblu (visitor) and /co-unblu (agent) are separated
 # and authentication cookies are set on the correct path
@@ -713,12 +713,12 @@ Use the configuration below to activate it.</p>
 <code>expectedIssuer</code> and <code>expectedAudience</code> must match the <code>iss</code> and <code>aud</code> claims as set by the application.</p>
 </div>
 <div class="sect2">
-<h3 id="_configuring_authentication_session_timeouts">Configuring authentication session timeouts</h3>
+<h3 id="_configuring_authentication_session_timeouts"><a class="anchor" href="#_configuring_authentication_session_timeouts"></a>Configuring authentication session timeouts</h3>
 <div class="paragraph">
 <p>If you&#8217;re looking into ending authentication sessions&#8212;&#8203;for example, as described <a href="#ending-an-unblu-session">below</a>--you may also want to review the following configuration properties, which apply to both visitors and agents:</p>
 </div>
 <div class="listingblock">
-<div class="title">Authentication session timeouts</div>
+<div class="title">Listing 2. Authentication session timeouts</div>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="ini"><span class="c"># Idle session timeout in seconds. Set to a lower value,
 # for example 3600 (1h). The default value is equal to 24 hours.
@@ -735,7 +735,7 @@ Use the configuration below to activate it.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_encrypting_the_jwt_payload">Encrypting the JWT payload</h2>
+<h2 id="_encrypting_the_jwt_payload"><a class="anchor" href="#_encrypting_the_jwt_payload"></a>Encrypting the JWT payload</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>You can encrypt the JWT.
@@ -747,7 +747,7 @@ This will hide the content of the JWT payload from the visitor if they intercept
 </div>
 </div>
 <div class="sect1">
-<h2 id="_generating_an_rsa_key_pair_to_encrypt_the_jwt">Generating an RSA key pair to encrypt the JWT</h2>
+<h2 id="_generating_an_rsa_key_pair_to_encrypt_the_jwt"><a class="anchor" href="#_generating_an_rsa_key_pair_to_encrypt_the_jwt"></a>Generating an RSA key pair to encrypt the JWT</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>To use RSA JWT encryption, generate an RSA key pair.
@@ -757,7 +757,7 @@ RSA encryption uses a separate key pair, and the application uses Unblu&#8217;s 
 <p>The snippet belows shows how to generate an RSA key pair using <code>openssl</code>.</p>
 </div>
 <div class="listingblock">
-<div class="title">Generate RSA key pair</div>
+<div class="title">Listing 3. Generate RSA key pair</div>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="bash">openssl genpkey <span class="nt">-algorithm</span> RSA <span class="nt">-out</span> unblu.pem <span class="nt">-pkeyopt</span> rsa_keygen_bits:2048
 openssl rsa <span class="nt">-pubout</span> <span class="nt">-in</span> unblu.pem <span class="nt">-out</span> unblu_public.pem</code></pre>
@@ -766,13 +766,13 @@ openssl rsa <span class="nt">-pubout</span> <span class="nt">-in</span> unblu.pe
 </div>
 </div>
 <div class="sect1">
-<h2 id="_generating_an_aes_encryption_key">Generating an AES encryption key</h2>
+<h2 id="_generating_an_aes_encryption_key"><a class="anchor" href="#_generating_an_aes_encryption_key"></a>Generating an AES encryption key</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>To use AES JWT encryption, generate a base64 encoded byte array of 32 bytes length.</p>
 </div>
 <div class="listingblock">
-<div class="title">Generate AES encryption key</div>
+<div class="title">Listing 4. Generate AES encryption key</div>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="bash">openssl rand <span class="nt">-base64</span> 32</code></pre>
 </div>
@@ -780,7 +780,7 @@ openssl rsa <span class="nt">-pubout</span> <span class="nt">-in</span> unblu.pe
 </div>
 </div>
 <div class="sect1">
-<h2 id="_generating_a_jwt">Generating a JWT</h2>
+<h2 id="_generating_a_jwt"><a class="anchor" href="#_generating_a_jwt"></a>Generating a JWT</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The code samples that follow are part of a <a href="https://github.com/unblu/unblu-visitor-sso-sample">sample implementation</a> of visitor SSO and may be freely copied.</p>
@@ -794,7 +794,7 @@ It must include the user attributes as claims.
 The claims must be named as configured in the <a href="https://www.unblu.com/en/docs/latest/reference/configuration-properties.html#com-unblu-platform-server-core-auth-configuration-claimmappingconfiguration" target="_blank" rel="noopener"><code>claimMapping</code></a> in the Unblu configuration.</p>
 </div>
 <div class="listingblock">
-<div class="title">Decoded sample JWT</div>
+<div class="title">Listing 5. Decoded sample JWT</div>
 <div class="content">
 <pre class="rouge highlight"><code>Token header
 ------------
@@ -831,7 +831,7 @@ You can check a JWT with a service such as <a href="https://jwt.io/">jwt.io</a>.
 </table>
 </div>
 <div class="listingblock">
-<div class="title">Create a JWT in Kotlin using the <a href="https://connect2id.com/products/nimbus-jose-jwt">Nimbus</a> library</div>
+<div class="title">Listing 6. Create a JWT in Kotlin using the <a href="https://connect2id.com/products/nimbus-jose-jwt">Nimbus</a> library</div>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="kotlin"><span class="kd">val</span> <span class="py">header</span> <span class="p">=</span> <span class="nc">JWSHeader</span><span class="p">.</span><span class="nc">Builder</span><span class="p">(</span><span class="nc">JWSAlgorithm</span><span class="p">.</span><span class="nc">RS256</span><span class="p">)</span>
     <span class="p">.</span><span class="nf">type</span><span class="p">(</span><span class="nc">JOSEObjectType</span><span class="p">.</span><span class="nc">JWT</span><span class="p">)</span>
@@ -871,7 +871,7 @@ If you use rotating keys, you should therefore include some grace period during 
 </ol>
 </div>
 <div class="listingblock">
-<div class="title">Generate RSA key pair to sign JWTs</div>
+<div class="title">Listing 7. Generate RSA key pair to sign JWTs</div>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="kotlin"><span class="k">private</span> <span class="kd">val</span> <span class="py">key</span><span class="p">:</span> <span class="nc">RSAKey</span> <span class="p">=</span> <span class="nc">RSAKeyGenerator</span><span class="p">(</span><span class="mi">2048</span><span class="p">)</span>
     <span class="p">.</span><span class="nf">keyUse</span><span class="p">(</span><span class="nc">KeyUse</span><span class="p">.</span><span class="nc">SIGNATURE</span><span class="p">)</span>
@@ -881,7 +881,7 @@ If you use rotating keys, you should therefore include some grace period during 
 </div>
 </div>
 <div class="listingblock">
-<div class="title">Expose the public key in a JWK set in a Spring Boot application</div>
+<div class="title">Listing 8. Expose the public key in a JWK set in a Spring Boot application</div>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="kotlin"><span class="nd">@GetMapping</span><span class="p">(</span><span class="s">"jwk"</span><span class="p">)</span>
 <span class="k">fun</span> <span class="nf">keys</span><span class="p">():</span> <span class="nc">Map</span><span class="p">&lt;</span><span class="nc">String</span><span class="p">,</span> <span class="nc">Any</span><span class="p">&gt;</span> <span class="p">{</span>
@@ -890,7 +890,7 @@ If you use rotating keys, you should therefore include some grace period during 
 </div>
 </div>
 <div class="listingblock">
-<div class="title">Example response of the JWK endpoint</div>
+<div class="title">Listing 9. Example response of the JWK endpoint</div>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="json"><span class="p">{</span><span class="w">
   </span><span class="nl">"keys"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
@@ -909,14 +909,14 @@ If you use rotating keys, you should therefore include some grace period during 
 </div>
 </div>
 <div class="sect1">
-<h2 id="_starting_an_unblu_authentication_session_using_a_jwt">Starting an Unblu authentication session using a JWT</h2>
+<h2 id="_starting_an_unblu_authentication_session_using_a_jwt"><a class="anchor" href="#_starting_an_unblu_authentication_session_using_a_jwt"></a>Starting an Unblu authentication session using a JWT</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Unblu exposes an endpoint to check whether a user is currently authenticated.
 We recommend calling this endpoint before starting a new authentication.</p>
 </div>
 <div class="listingblock">
-<div class="title">Check whether a user has a valid session in Unblu</div>
+<div class="title">Listing 10. Check whether a user has a valid session in Unblu</div>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="javascript"><span class="cm">/**
   * Calls the authentication verification endpoint of Unblu.
@@ -943,7 +943,7 @@ We recommend calling this endpoint before starting a new authentication.</p>
 After obtaining the signed JWT from the application, the JWT must be sent to Unblu in a POST request to the endpoint <code>unblu/rest/authenticator/loginWithSecureToken</code>.</p>
 </div>
 <div class="listingblock">
-<div class="title">Call <code>loginWithSecureToken</code> from the visitor&#8217;s browser</div>
+<div class="title">Listing 11. Call <code>loginWithSecureToken</code> from the visitor&#8217;s browser</div>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="javascript"><span class="cm">/**
   * Starts an Unblu authentication session using a JWT.
@@ -974,7 +974,7 @@ After obtaining the signed JWT from the application, the JWT must be sent to Unb
 <p>The response to <code>loginWithSecureToken</code> includes a <code>Set-Cookie</code> header.</p>
 </div>
 <div class="listingblock">
-<div class="title">Example authentication cookie</div>
+<div class="title">Listing 12. Example authentication cookie</div>
 <div class="content">
 <pre class="rouge highlight"><code>Set-Cookie: x-unblu-authsession="4c2sGUuN-6GM8pL9-szYsb8_AQlEM49nJDY~";Path=/unblu;Expires=Wed, 09 Jun 2021 14:41:12 GMT;SameSite=None;Secure;HttpOnly</code></pre>
 </div>
@@ -988,7 +988,7 @@ Your website should then use this subdomain to call Unblu.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_ending_an_unblu_session">Ending an Unblu session</h2>
+<h2 id="_ending_an_unblu_session"><a class="anchor" href="#_ending_an_unblu_session"></a>Ending an Unblu session</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Depending on your risk assessment, you may want to end the Unblu session when the application performs a logout.</p>
@@ -998,7 +998,7 @@ Your website should then use this subdomain to call Unblu.</p>
 You can check them out <a href="#configuring-authentication-session-timeouts">here</a>.</p>
 </div>
 <div class="listingblock">
-<div class="title">Call <code>clientLogout</code> from the visitor&#8217;s browser</div>
+<div class="title">Listing 13. Call <code>clientLogout</code> from the visitor&#8217;s browser</div>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="javascript"><span class="cm">/**
   * Calls the Unblu logout endpoint.
@@ -1027,7 +1027,7 @@ You can check them out <a href="#configuring-authentication-session-timeouts">he
 </div>
 </div>
 <div class="listingblock">
-<div class="title">Execute <code>logout</code> from the application backend (server-to-server API call)</div>
+<div class="title">Listing 14. Execute <code>logout</code> from the application backend (server-to-server API call)</div>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="kotlin"><span class="nd">@GetMapping</span><span class="p">(</span><span class="s">"logout"</span><span class="p">)</span>
 <span class="k">fun</span> <span class="nf">logout</span><span class="p">(</span><span class="n">session</span><span class="p">:</span> <span class="nc">WebSession</span><span class="p">):</span> <span class="nc">String</span> <span class="p">{</span>
@@ -1070,7 +1070,7 @@ You can check them out <a href="#configuring-authentication-session-timeouts">he
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-02-25 15:43:36 UTC
+Last updated 2026-06-08 14:08:59 UTC
 </div>
 </div>
 </body>
