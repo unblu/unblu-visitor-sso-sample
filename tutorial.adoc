@@ -2,6 +2,8 @@
 :source-highlighter: rouge
 :toc:
 :imagesdir: images
+:listing-caption: Listing
+:sectanchors:
 
 This tutorial is intended as a guide for developers implementing Unblu's visitor SSO using JSON Web Tokens (JWT) in an application.
 
