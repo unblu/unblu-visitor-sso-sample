@@ -1049,7 +1049,7 @@ You can check them out <a href="#configuring-authentication-session-timeouts">he
     <span class="kd">val</span> <span class="py">jwt</span><span class="p">:</span> <span class="nc">String</span> <span class="p">=</span> <span class="nf">createJwt</span><span class="p">(</span><span class="n">signedJWT</span><span class="p">)</span>
 
     <span class="kd">val</span> <span class="py">targetURI</span> <span class="p">=</span>
-        <span class="nc">URI</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="n">unbluConfig</span><span class="p">.</span><span class="n">serverUrl</span> <span class="p">+</span> <span class="n">unbluConfig</span><span class="p">.</span><span class="n">entryPath</span> <span class="p">+</span> <span class="s">"/rest/v3/authenticator/logoutWithSecureToken?x-unblu-apikey="</span> <span class="p">+</span> <span class="n">unbluConfig</span><span class="p">.</span><span class="n">apiKey</span><span class="p">)</span>
+        <span class="nc">URI</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="n">unbluConfig</span><span class="p">.</span><span class="n">serverUrl</span> <span class="p">+</span> <span class="n">unbluConfig</span><span class="p">.</span><span class="n">entryPath</span> <span class="p">+</span> <span class="s">"/rest/v4/authenticator/logoutWithSecureToken?x-unblu-apikey="</span> <span class="p">+</span> <span class="n">unbluConfig</span><span class="p">.</span><span class="n">apiKey</span><span class="p">)</span>
     <span class="kd">val</span> <span class="py">client</span> <span class="p">=</span> <span class="nc">HttpClient</span><span class="p">.</span><span class="nf">newBuilder</span><span class="p">().</span><span class="nf">build</span><span class="p">()</span>
     <span class="kd">val</span> <span class="py">request</span> <span class="p">=</span> <span class="nc">HttpRequest</span><span class="p">.</span><span class="nf">newBuilder</span><span class="p">()</span>
         <span class="p">.</span><span class="nf">uri</span><span class="p">(</span><span class="n">targetURI</span><span class="p">)</span>
@@ -1070,7 +1070,7 @@ You can check them out <a href="#configuring-authentication-session-timeouts">he
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-06-08 14:08:59 UTC
+Last updated 2026-08-14 08:14:29 UTC
 </div>
 </div>
 </body>
